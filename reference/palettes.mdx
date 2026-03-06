@@ -1,0 +1,465 @@
+---
+title: Palettes Reference
+description: Technical reference for palette configuration and block composition
+---
+
+## Overview
+
+The `palettes/` directory contains configuration files that define what blocks make up the terrain. Palettes are used by biomes to determine the surface and subsurface block composition.
+
+<Note>
+Palettes control the **block composition** of terrain, not its shape. Terrain shape is determined by noise samplers and biome configs.
+</Note>
+
+## Directory Structure
+
+```
+palettes/
+├── arid/              # Desert and badlands palettes
+│   ├── sand.yml
+│   ├── red_sand.yml
+│   ├── badlands_strata.yml
+│   ├── terracotta_strata.yml
+│   ├── terracotta_strata_gold.yml
+│   ├── terracotta_strata_red.yml
+│   ├── terracotta_strata_vertical.yml
+│   ├── terracotta_slant.yml
+│   ├── sand_canyon.yml
+│   ├── salt.yml
+│   ├── xeric.yml
+│   ├── xeric_light_gray_terracotta.yml
+│   ├── xeric_sandstone.yml
+│   ├── arid.yml
+│   └── frozen_canyon.yml
+├── temperate/         # Forest and plains palettes
+│   ├── grass.yml
+│   ├── podzol.yml
+│   ├── coarse_dirt.yml
+│   ├── mossy_stone.yml
+│   └── ...
+├── cold/              # Snow and ice palettes
+│   ├── snow.yml
+│   ├── ice.yml
+│   ├── packed_ice.yml
+│   └── ...
+├── ocean/             # Ocean floor palettes
+│   ├── ocean_floor.yml
+│   ├── gravel.yml
+│   ├── sand_ocean.yml
+│   └── ...
+├── cave/              # Underground palettes
+│   ├── stone.yml
+│   ├── deepslate.yml
+│   ├── dripstone.yml
+│   └── ...
+└── special/           # Unique palettes
+    ├── mycelium.yml
+    ├── volcanic.yml
+    └── ...
+```
+
+## Palette Configuration Structure
+
+Basic palette structure:
+
+```yaml
+id: PALETTE_ID
+type: PALETTE
+
+layers:
+  - materials:        # Top layer
+      - minecraft:block_id: weight
+    layers: count     # How many blocks deep
+  - materials:        # Next layer down
+      - minecraft:block_id: weight
+    layers: count
+  # ... more layers
+```
+
+## Simple Example
+
+Here's the sand palette:
+
+```yaml reference
+/home/daytona/workspace/source/palettes/arid/sand.yml
+```
+
+```yaml
+id: SAND
+type: PALETTE
+
+layers:
+  - materials:
+      - minecraft:sand: 1
+    layers: 2
+  - materials:
+      - minecraft:sandstone: 1
+    layers: 2
+  - materials:
+      - minecraft:stone: 1
+    layers: 1
+```
+
+This creates:
+- 2 layers of sand on top
+- 2 layers of sandstone below
+- 1 layer of stone (extends to bedrock)
+
+<Note>
+The last layer always extends down to bedrock unless explicitly limited.
+</Note>
+
+## Layer Configuration
+
+### Materials
+
+Materials can be:
+
+<AccordionGroup>
+  <Accordion title="Single Block">
+    ```yaml
+    materials:
+      - minecraft:grass_block: 1
+    ```
+  </Accordion>
+
+  <Accordion title="Weighted Mixture">
+    ```yaml
+    materials:
+      - minecraft:grass_block: 3
+      - minecraft:dirt: 1
+    ```
+    
+    75% grass blocks, 25% dirt blocks (3:1 ratio)
+  </Accordion>
+
+  <Accordion title="Block States">
+    ```yaml
+    materials:
+      - minecraft:oak_leaves[persistent=true]: 1
+    ```
+  </Accordion>
+
+  <Accordion title="Using Block Shortcuts">
+    Terra provides shortcuts for common blocks:
+    
+    ```yaml
+    materials:
+      - GRASS: 1      # Grass block
+      - DIRT: 1       # Dirt
+      - STONE: 1      # Stone
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Layer Depth
+
+```yaml
+layers:
+  - materials:
+      - minecraft:grass_block: 1
+    layers: 1          # Exactly 1 block deep
+  
+  - materials:
+      - minecraft:dirt: 1
+    layers: 4          # 4 blocks deep
+  
+  - materials:
+      - minecraft:stone: 1
+    layers: 1          # Extends to bedrock (last layer)
+```
+
+## Palette Categories
+
+### Arid Palettes
+
+For desert, badlands, and dry biomes.
+
+<Accordion title="Sand Variants">
+  - `sand.yml` - Standard yellow sand
+  - `red_sand.yml` - Red desert sand
+  - `sand_canyon.yml` - Mixed sand for canyons
+  - `sand_ocean.yml` - Sand with sandstone base
+</Accordion>
+
+<Accordion title="Terracotta Palettes">
+  Colorful stratified palettes for badlands:
+  
+  - `badlands_strata.yml` - Classic badlands layers
+  - `terracotta_strata.yml` - Standard terracotta layers
+  - `terracotta_strata_gold.yml` - Gold-tinted variant
+  - `terracotta_strata_red.yml` - Red-tinted variant
+  - `terracotta_strata_vertical.yml` - Vertical banding
+  - `terracotta_slant.yml` - Diagonal layers
+  
+  These use multiple weighted terracotta colors to create natural banding.
+</Accordion>
+
+<Accordion title="Dry Surface">
+  - `xeric.yml` - Dry cracked earth
+  - `xeric_sandstone.yml` - Sandstone variant
+  - `xeric_light_gray_terracotta.yml` - Gray terracotta mix
+  - `arid.yml` - General arid surface
+  - `salt.yml` - Salt flat appearance
+</Accordion>
+
+### Temperate Palettes
+
+For forests, plains, and moderate climate biomes.
+
+<Accordion title="Grass-Based">
+  - `grass.yml` - Standard grass and dirt
+  - `podzol.yml` - Podzol surface (forests)
+  - `mycelium.yml` - Mushroom biome surface
+  - `coarse_dirt.yml` - Coarse dirt variant
+</Accordion>
+
+<Accordion title="Stone Surfaces">
+  - `stone.yml` - Exposed stone
+  - `mossy_stone.yml` - Moss-covered stone
+  - `andesite.yml` - Andesite surface
+  - `granite.yml` - Granite surface
+  - `diorite.yml` - Diorite surface
+</Accordion>
+
+### Cold Palettes
+
+For snowy and frozen biomes.
+
+<Accordion title="Snow & Ice">
+  - `snow.yml` - Snow layers over dirt
+  - `snow_stone.yml` - Snow over stone
+  - `ice.yml` - Ice surface
+  - `packed_ice.yml` - Packed ice
+  - `frozen_canyon.yml` - Mixed ice and stone
+</Accordion>
+
+### Ocean Palettes
+
+For underwater terrain.
+
+<Accordion title="Ocean Floors">
+  - `ocean_floor.yml` - Standard gravel/dirt mix
+  - `sand_ocean.yml` - Sandy ocean floor
+  - `gravel.yml` - Pure gravel
+  - `clay.yml` - Clay deposits
+  - `coral_ocean.yml` - Coral block base
+</Accordion>
+
+### Cave Palettes
+
+For underground and cave biomes.
+
+<Accordion title="Stone Types">
+  - `stone.yml` - Standard stone
+  - `deepslate.yml` - Deep underground
+  - `dripstone.yml` - Dripstone caves
+  - `moss_cave.yml` - Lush caves
+  - `sculk.yml` - Deep dark
+</Accordion>
+
+## Advanced Palette Features
+
+### Noise-Based Variation
+
+Palettes can use noise for dynamic variation:
+
+```yaml
+id: VARIED_PALETTE
+type: PALETTE
+
+layers:
+  - materials:
+      - minecraft:grass_block: 1
+    layers: 1
+  - materials:
+      - minecraft:dirt: 3
+      - minecraft:coarse_dirt: 1
+    layers:
+      type: NOISE
+      sampler:
+        type: WHITE_NOISE
+      min: 3
+      max: 6
+  - materials:
+      - minecraft:stone: 1
+    layers: 1
+```
+
+This varies the dirt layer depth between 3-6 blocks using noise.
+
+### Slant-Based Palettes
+
+Different blocks on slopes vs flat terrain:
+
+```yaml
+layers:
+  - materials:
+      - minecraft:grass_block: 1
+    layers: 1
+    slant:
+      min: 0.0
+      max: 0.3    # Only on flat/gentle slopes
+  - materials:
+      - minecraft:stone: 1
+    layers: 1
+    slant:
+      min: 0.3
+      max: 1.0    # Only on steep slopes
+```
+
+Slant calculation is configured in `pack.yml`:
+
+```yaml
+slant:
+  calculation-method: DotProduct  # Or NormalVector
+```
+
+### Conditional Palettes
+
+Palettes can include conditions:
+
+```yaml
+layers:
+  - materials:
+      - minecraft:snow_block: 1
+    layers: 1
+    y:
+      min: 100    # Only above Y=100
+      max: 320
+```
+
+## Using Palettes in Biomes
+
+Biomes reference palettes in their configuration:
+
+```yaml
+id: BIOME_ID
+type: BIOME
+
+palette:
+  - GRASS: 1          # Single palette
+
+# Or multiple palettes with noise blending
+palette:
+  - GRASS: 3
+  - PODZOL: 1
+  sampler:
+    type: CELLULAR
+    frequency: 0.02
+```
+
+### Palette Blending
+
+Multiple palettes can be blended:
+
+```yaml
+palette:
+  - GRASS: 2
+  - COARSE_DIRT: 1
+  sampler:
+    type: OPEN_SIMPLEX_2
+    frequency: 0.05
+```
+
+This creates patches of different palettes using noise.
+
+## Palette Design Tips
+
+### Layer Ordering
+
+1. **Top layer** - Surface appearance (grass, sand, snow)
+2. **Subsurface layers** - Transition materials (dirt, sandstone)
+3. **Base layer** - Deep underground (stone, deepslate)
+
+### Material Weights
+
+Use weights to create natural variation:
+
+```yaml
+materials:
+  - minecraft:grass_block: 8    # 80% grass
+  - minecraft:dirt: 2           # 20% exposed dirt
+```
+
+### Layer Depth Guidelines
+
+- **Surface**: 1-2 layers (grass, snow, sand)
+- **Subsurface**: 3-5 layers (dirt, sandstone)
+- **Base**: 1 layer (extends to bedrock)
+
+### Creating Strata
+
+For layered rock formations:
+
+```yaml
+layers:
+  - materials:
+      - minecraft:red_terracotta: 2
+      - minecraft:orange_terracotta: 1
+    layers: 3
+  - materials:
+      - minecraft:yellow_terracotta: 1
+    layers: 2
+  - materials:
+      - minecraft:white_terracotta: 1
+    layers: 2
+  - materials:
+      - minecraft:light_gray_terracotta: 1
+    layers: 3
+  # Repeat for depth
+```
+
+## Palette Inheritance
+
+Palettes can extend others to reduce duplication:
+
+```yaml
+id: SNOWY_GRASS
+type: PALETTE
+
+extends: GRASS
+
+layers:
+  - materials:
+      - minecraft:snow_block: 1
+    layers: 1
+  # Inherits remaining layers from GRASS
+```
+
+## Testing Palettes
+
+### Single Biome Testing
+
+Use the single biome preset to test palettes:
+
+```yaml
+# In pack.yml
+biomes: $biome-distribution/presets/single.yml:biomes
+
+# In single.yml
+biomes:
+  type: SINGLE
+  biome: YOUR_TEST_BIOME
+```
+
+### Superflat Testing
+
+Create a biome with flat terrain to see palette layers clearly:
+
+```yaml
+noise-equation: "0"  # Perfectly flat
+palette:
+  - YOUR_PALETTE: 1
+```
+
+## Related References
+
+<CardGroup cols={2}>
+  <Card title="Configuration Overview" icon="book" href="/reference/overview">
+    How palettes fit into the overall config structure
+  </Card>
+  <Card title="Math Functions" icon="calculator" href="/reference/math-functions">
+    Samplers used for palette variation and blending
+  </Card>
+</CardGroup>

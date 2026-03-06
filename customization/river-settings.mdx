@@ -1,0 +1,244 @@
+---
+title: River Settings
+description: Customize river generation, width, frequency, and distribution in Origen
+---
+
+Origen features dynamic river generation that flows through biomes tagged with "USE_RIVER". Rivers in Origen are generally broader and deeper than vanilla rivers, allowing for smoother boat navigation.
+
+## Core River Parameters
+
+### riverScale
+
+<ParamField path="biomeSpread.riverScale" type="number" default="0.0013">
+  Frequency of rivers. This controls how close together rivers generate and their relative size.
+  
+  - **Increase:** Rivers become closer together and smaller
+  - **Decrease:** Rivers become bigger and more spaced out
+</ParamField>
+
+```yaml customization.yml
+biomeSpread:
+  riverScale: 0.0013  # Default value
+```
+
+#### Examples
+
+**Many small rivers:**
+```yaml
+biomeSpread:
+  riverScale: 0.002  # Higher frequency
+```
+
+**Fewer large rivers:**
+```yaml
+biomeSpread:
+  riverScale: 0.0008  # Lower frequency
+```
+
+**Rare massive rivers:**
+```yaml
+biomeSpread:
+  riverScale: 0.0005  # Very low frequency
+```
+
+### river-spread-scale
+
+<ParamField path="river-spread-scale" type="number" default="1">
+  Controls how far apart rivers generally are. Larger scale creates further apart rivers, smaller scale creates closer packed rivers.
+</ParamField>
+
+```yaml customization.yml
+river-spread-scale: 1
+```
+
+### river-max-width
+
+<ParamField path="river-max-width" type="number" default="20">
+  Controls the maximum width of rivers in blocks. Wider rivers are better for boat navigation but may dominate smaller biomes.
+</ParamField>
+
+```yaml customization.yml
+river-max-width: 20
+```
+
+#### Examples
+
+**Narrow streams:**
+```yaml
+river-max-width: 10
+```
+
+**Wide rivers:**
+```yaml
+river-max-width: 35
+```
+
+**Massive waterways:**
+```yaml
+river-max-width: 50
+```
+
+<Warning>
+Very wide rivers (`> 40` blocks) may not generate properly in smaller biomes and can create generation artifacts.
+</Warning>
+
+## Complete River Configuration
+
+Here's the complete river configuration section from `customization.yml`:
+
+```yaml customization.yml
+# In biomeSpread section
+biomeSpread:
+  # Frequency of rivers
+  riverScale: 0.0013
+
+# In main configuration
+river-spread-scale: 1
+river-max-width: 20
+```
+
+## River Configuration Examples
+
+### Dense River Network
+
+Create a world with many interconnected rivers:
+
+```yaml
+biomeSpread:
+  riverScale: 0.002  # More frequent rivers
+
+river-spread-scale: 0.7  # Closer together
+river-max-width: 15  # Moderate width
+```
+
+This configuration produces:
+- Frequent river generation
+- Many interconnected waterways
+- Good for boat-based exploration
+- More water features throughout the world
+
+### Sparse Major Rivers
+
+Create rare but impressive river systems:
+
+```yaml
+biomeSpread:
+  riverScale: 0.0006  # Very low frequency
+
+river-spread-scale: 2.0  # Very far apart
+river-max-width: 40  # Very wide
+```
+
+This configuration produces:
+- Rare, major river systems
+- Impressive water features
+- Large areas without rivers
+- Rivers feel more significant
+
+### Realistic River Network
+
+Balance between frequency and size:
+
+```yaml
+biomeSpread:
+  riverScale: 0.001  # Slightly lower frequency
+
+river-spread-scale: 1.2  # Slightly further apart
+river-max-width: 25  # Moderate-wide
+```
+
+### No Rivers
+
+To disable rivers entirely, set a very high frequency:
+
+```yaml
+biomeSpread:
+  riverScale: 1.0  # Effectively disables rivers
+```
+
+<Note>
+Some biomes in Origen are specifically designed with river features in mind. Disabling rivers may make these biomes feel incomplete.
+</Note>
+
+## River Variants
+
+Origen includes special river variants for certain biomes:
+
+- **Cave rivers:** Rivers that flow through caverns in large mountain biomes
+- **Frozen rivers:** Ice-covered rivers in cold biomes
+- **Dry riverbeds:** Can appear in arid regions
+
+These variants are defined in individual biome configurations and are affected by the global river settings above.
+
+## Biome-Specific River Features
+
+Individual biomes can extend river decoration features. These are configured in the biome files under:
+
+```yaml
+stages:
+  river-decoration:
+    # Biome-specific river features
+```
+
+<Tip>
+To customize how rivers appear in specific biomes, check the biome configuration files in `biomes/` rather than the global river settings.
+</Tip>
+
+## Testing River Changes
+
+1. **Backup your world** - River changes affect terrain generation
+2. **Edit customization.yml** with your desired river parameters
+3. **Restart your server** or create a new world
+4. **Explore multiple biomes** - River generation varies by biome type
+5. **Look for river-tagged biomes** - Not all biomes support rivers
+
+<Note>
+River generation is integrated with terrain generation, so changes only affect newly generated chunks.
+</Note>
+
+## Advanced: River Noise Functions
+
+River generation uses noise samplers defined in `math/samplers/rivers.yml`. Advanced users can modify these samplers for complete control over river generation patterns.
+
+```yaml math/samplers/rivers.yml
+samplers:
+  # Advanced river noise configuration
+  # See Terra documentation for details
+```
+
+<Warning>
+Modifying river samplers directly can cause generation errors if not done correctly. Only edit these files if you're comfortable with Terra's noise system.
+</Warning>
+
+## Interaction with Other Settings
+
+River generation interacts with several other terrain settings:
+
+- **Biome size** - Larger biomes can accommodate wider rivers
+- **Terrain height** - Affects river depth and canyon formation
+- **Continental scale** - Determines where rivers can generate
+- **Ocean level** - Rivers flow toward ocean level (Y 62)
+
+### Coordinated Example
+
+For a world with dramatic river canyons:
+
+```yaml customization.yml
+# Large biomes for big river systems
+biomeSpread:
+  cellDistance: 500
+  riverScale: 0.0008  # Big rivers
+
+# Tall terrain for deep canyons
+terrain-height: 120
+
+# Wide rivers
+river-max-width: 35
+river-spread-scale: 1.5
+```
+
+## Related Settings
+
+- [Biome Sizes](/customization/biome-sizes) - Affects how rivers fit within biomes
+- [Terrain Settings](/customization/terrain-settings) - Determines river depth and canyon formation
+- [Distribution Presets](/customization/distribution-presets) - Special biomes like canyons that can intersect with rivers

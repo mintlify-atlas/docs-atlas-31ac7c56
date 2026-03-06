@@ -1,0 +1,251 @@
+---
+title: Terrain Settings
+description: Customize terrain height, elevation, and continental distribution in Origen
+---
+
+Origen provides extensive control over terrain generation through various parameters in `customization.yml`. You can adjust base terrain height, continental distribution, elevation scales, and more.
+
+## Terrain Height
+
+Control the base height and vertical scale of terrain generation:
+
+### Base Terrain
+
+<ParamField path="terrain-base-y-level" type="number" default="65">
+  The base Y level for terrain generation. This is the approximate height of flat terrain like plains.
+</ParamField>
+
+<ParamField path="terrain-height" type="number" default="100">
+  The maximum height variation above the base Y level. Controls how tall mountains and hills can be.
+</ParamField>
+
+```yaml customization.yml
+terrain-base-y-level: 65
+terrain-height: 100
+```
+
+**Effective terrain range:** Y 65 to Y 165 (65 + 100)
+
+### Ocean Terrain
+
+<ParamField path="terrain-ocean-base-y-level" type="number" default="60">
+  The base Y level for ocean floor generation.
+</ParamField>
+
+<ParamField path="terrain-ocean-depth" type="number" default="100">
+  Maximum depth variation below the ocean base level. Controls how deep ocean trenches can be.
+</ParamField>
+
+```yaml customization.yml
+terrain-ocean-base-y-level: 60
+terrain-ocean-depth: 100
+```
+
+**Effective ocean range:** Y -40 to Y 60 (60 - 100)
+
+## Continental Distribution
+
+Control the scale and distribution of continents versus oceans:
+
+<ParamField path="continental-scale" type="number" default="0.8">
+  Controls the scale of land/coastal/oceanic distribution. Increasing this produces larger landmasses and larger oceans. Decreasing it creates more fragmented continents.
+</ParamField>
+
+<ParamField path="continental-offset" type="number" default="0.2">
+  Shifts the continental distribution, affecting the overall ratio of land to ocean. Positive values create more land, negative values create more ocean.
+</ParamField>
+
+<ParamField path="continental-coast-width" type="number" default="30">
+  The width in blocks of coastal transition zones between land and ocean.
+</ParamField>
+
+<ParamField path="continental-coast-threshold" type="number" default="0.05">
+  Threshold value that determines where coasts begin. Affects the sharpness of land-to-ocean transitions.
+</ParamField>
+
+```yaml customization.yml
+continental-scale: 0.8
+continental-offset: 0.2
+continental-coast-width: 30
+continental-coast-threshold: 0.05
+```
+
+### Example: More Land, Less Ocean
+
+```yaml
+continental-scale: 1.2
+continental-offset: 0.4
+```
+
+### Example: Archipelago World
+
+```yaml
+continental-scale: 0.4
+continental-offset: -0.1
+continental-coast-width: 50
+```
+
+## Elevation Settings
+
+Control how elevation varies across the terrain:
+
+<ParamField path="elevation-scale" type="number" default="1">
+  Controls the scale of the elevation noise map. Larger values create more gradual elevation changes over distance. Smaller values create more sudden changes.
+  
+  **Note:** This does NOT affect individual biome height. Use terrain-height for that.
+</ParamField>
+
+<ParamField path="elevation-highlands-threshold" type="number" default="0.4">
+  Threshold value for determining highland areas. Higher values create fewer highlands.
+</ParamField>
+
+<ParamField path="elevation-flatlands-threshold" type="number" default="0.1">
+  Threshold value for determining flatland areas. Higher values create more flatlands.
+</ParamField>
+
+```yaml customization.yml
+elevation-scale: 1
+elevation-highlands-threshold: 0.4
+elevation-flatlands-threshold: 0.1
+```
+
+### Example: Mountainous World
+
+```yaml
+elevation-scale: 1.5
+elevation-highlands-threshold: 0.2  # More highlands
+terrain-height: 150  # Taller mountains
+```
+
+### Example: Flat World with Gentle Hills
+
+```yaml
+elevation-scale: 2.0  # Very gradual changes
+elevation-flatlands-threshold: 0.3  # More flatlands
+terrain-height: 60  # Lower height variation
+```
+
+## Spawn Island
+
+Origen supports a customizable spawn island feature:
+
+<ParamField path="spawn-island-origin-x" type="number" default="0">
+  X coordinate of the spawn island center.
+</ParamField>
+
+<ParamField path="spawn-island-origin-z" type="number" default="0">
+  Z coordinate of the spawn island center.
+</ParamField>
+
+<ParamField path="spawn-island-radius-inner" type="number" default="20">
+  Radius where continental value is set to 1 (inland). The guaranteed land area.
+</ParamField>
+
+<ParamField path="spawn-island-radius-middle" type="number" default="125">
+  Radius where continental value is set to 0 (coast). Where the coastline forms.
+</ParamField>
+
+<ParamField path="spawn-island-radius-outer" type="number" default="400">
+  Radius where continental value is set to -1 (deep ocean). Where deep ocean begins.
+</ParamField>
+
+<ParamField path="spawn-island-elevation-scale" type="number" default="0.3">
+  Scales elevation within the spawn island. Lower values create flatter spawn areas. Range 0-1.
+</ParamField>
+
+```yaml customization.yml
+spawn-island-origin-x: 0
+spawn-island-origin-z: 0
+spawn-island-radius-inner: 20
+spawn-island-radius-middle: 125
+spawn-island-radius-outer: 400
+spawn-island-elevation-scale: 0.3
+```
+
+### Example: Large Flat Spawn Island
+
+```yaml
+spawn-island-radius-inner: 100
+spawn-island-radius-middle: 200
+spawn-island-elevation-scale: 0.1  # Very flat
+```
+
+## Complete Configuration Example
+
+Here's a complete terrain configuration for a dramatic, mountainous world:
+
+```yaml customization.yml
+# Tall, dramatic terrain
+terrain-base-y-level: 70
+terrain-height: 150
+terrain-ocean-base-y-level: 60
+terrain-ocean-depth: 120
+
+# Large continents
+continental-scale: 1.5
+continental-offset: 0.3
+continental-coast-width: 40
+continental-coast-threshold: 0.05
+
+# Varied elevation with many highlands
+elevation-scale: 1.2
+elevation-highlands-threshold: 0.3
+elevation-flatlands-threshold: 0.1
+
+# Comfortable spawn island
+spawn-island-origin-x: 0
+spawn-island-origin-z: 0
+spawn-island-radius-inner: 50
+spawn-island-radius-middle: 150
+spawn-island-radius-outer: 400
+spawn-island-elevation-scale: 0.2
+```
+
+<Warning>
+Extreme terrain height values (> 200) may cause generation artifacts or performance issues. Test incrementally when making large changes.
+</Warning>
+
+## World Y Levels
+
+World Y level boundaries are configured in `meta.yml`:
+
+```yaml meta.yml
+top-y: 319
+ocean-level: 62
+deepslate-top: 2
+deepslate-bottom: -12
+bedrock-top: -60
+bottom-y: -64
+```
+
+<Note>
+These values define the absolute world boundaries and material transitions. They should generally not be modified unless you understand the implications for world generation.
+</Note>
+
+## Climate Distribution
+
+While not strictly terrain settings, these parameters affect which biomes can generate where:
+
+### Temperature
+
+<ParamField path="temperature-scale" type="number" default="0.4">
+  Controls the scale of temperature zones. Increasing this value increases the distance between temperature changes, resulting in hot and cold biomes generating further apart.
+</ParamField>
+
+```yaml customization.yml
+temperature-scale: 0.4
+```
+
+### Precipitation
+
+<ParamField path="precipitation-scale" type="number" default="1">
+  Controls the scale of precipitation zones. Same concept as temperature zones - humid biomes generate away from arid biomes.
+</ParamField>
+
+```yaml customization.yml
+precipitation-scale: 1
+```
+
+<Tip>
+Adjust `temperature-scale` and `precipitation-scale` together with terrain settings to create cohesive climate zones that match your terrain generation.
+</Tip>

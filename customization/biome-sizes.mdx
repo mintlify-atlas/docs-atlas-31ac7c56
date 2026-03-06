@@ -1,0 +1,152 @@
+---
+title: Biome Size Customization
+description: Learn how to make biomes larger or smaller in Origen
+---
+
+Biomes in Origen are established using cellular noise, resulting in uniform size and shape for most biomes. You can easily adjust biome sizes through the `biomeSpread` section in `customization.yml`.
+
+## Core Parameters
+
+### cellDistance
+
+<ParamField path="biomeSpread.cellDistance" type="number" default="350">
+  Basic size of biomes, measured as the distance between two biome centers. Increase this value to make biomes bigger, decrease it to make them smaller.
+  
+  **Examples:**
+  - `250` - Smaller, more varied biomes
+  - `350` - Default size (recommended)
+  - `500` - Larger biomes with less variety
+  - `700` - Very large biomes
+</ParamField>
+
+### cellJitter
+
+<ParamField path="biomeSpread.cellJitter" type="number" default="0.9">
+  Controls how far biome centers can vary from their grid positions. Higher values create more irregular, organic biome shapes. Scale from 0 to 1.
+  
+  **Examples:**
+  - `0.3` - Very uniform, hexagonal biome shapes
+  - `0.6` - Moderate variation
+  - `0.9` - Default, highly organic shapes (recommended)
+  - `1.0` - Maximum irregularity
+</ParamField>
+
+## Configuration Example
+
+Here's how the biome spread section is configured in `customization.yml`:
+
+```yaml customization.yml
+biomeSpread:
+  # Basic size of biomes (distance between 2 biome centers)
+  # Increase to make biomes bigger
+  cellDistance: 350
+
+  # how far biome centers can vary away from their centers
+  # Increase to make biome sizes vary more (scale 0-1)
+  cellJitter: 0.9
+```
+
+## Practical Examples
+
+### Smaller, More Diverse World
+
+Create a world with many smaller biomes for more variety:
+
+```yaml
+biomeSpread:
+  cellDistance: 250
+  cellJitter: 0.9
+```
+
+This configuration produces:
+- Biomes approximately 30% smaller than default
+- More biome transitions
+- Greater variety in short distances
+
+### Larger, Epic Landscapes
+
+Create vast biomes for epic exploration:
+
+```yaml
+biomeSpread:
+  cellDistance: 600
+  cellJitter: 0.7
+```
+
+This configuration produces:
+- Biomes approximately 70% larger than default
+- Fewer biome transitions
+- More consistent landscapes
+- Slightly more uniform shapes
+
+### Ultra-Uniform Grid
+
+Create nearly perfect hexagonal biome patterns:
+
+```yaml
+biomeSpread:
+  cellDistance: 400
+  cellJitter: 0.2
+```
+
+<Warning>
+Very low jitter values (`< 0.4`) can create visibly artificial-looking biome patterns. The default `0.9` is recommended for natural-looking terrain.
+</Warning>
+
+## Border Biomes
+
+Some biomes in Origen have border variants (like coastal transitions). You can control the ratio of inner to outer biomes:
+
+<ParamField path="biomeSpread.borderBiomes.edgeThreshold" type="number" default="0.8">
+  Controls the ratio of inner/outer biomes for biomes with borders. Higher values create thinner borders, lower values create thicker borders.
+</ParamField>
+
+```yaml customization.yml
+biomeSpread:
+  borderBiomes:
+    edgeThreshold: 0.8  # Default
+```
+
+## Mountain Frequency
+
+Origen includes special mountain biomes that blend together. You can control their frequency:
+
+<ParamField path="biomeSpread.mountainFrequency" type="number" default="0.004">
+  Shared frequency of larger mountain biomes, allowing them to blend more easily. Increase for more frequent mountains, decrease for rarer ones.
+</ParamField>
+
+```yaml customization.yml
+biomeSpread:
+  mountainFrequency: 0.004  # Default
+```
+
+<Note>
+Changing biome sizes affects the entire world generation. Larger biomes may make specific biomes harder to find, while smaller biomes increase variety but may create more transition areas.
+</Note>
+
+## Global Scale (Legacy)
+
+Origen also includes a legacy `global-scale` parameter:
+
+<ParamField path="global-scale" type="number" default="1">
+  Modifies the scale of all biome distribution. Doubling the scale doubles the length and width of everything. This parameter is partially deprecated in favor of `cellDistance`.
+</ParamField>
+
+```yaml customization.yml
+global-scale: 1  # Default, will be removed in future versions
+```
+
+<Tip>
+For modern Origen versions, use `cellDistance` instead of `global-scale` for more predictable biome sizing.
+</Tip>
+
+## Testing Your Changes
+
+1. Edit `customization.yml` with your desired values
+2. Restart your server or recreate your world
+3. Explore different biomes to see the size changes
+4. Adjust values incrementally until you find your preferred balance
+
+<Note>
+Changes to biome size parameters only affect newly generated chunks. Existing chunks will retain their original biome layout.
+</Note>

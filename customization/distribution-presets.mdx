@@ -1,0 +1,308 @@
+---
+title: Distribution Presets
+description: Switch between different biome distribution presets and customize world generation styles
+---
+
+Origen comes with several biome distribution presets that dramatically change how the world generates. You can easily switch between presets or customize distribution stages in `pack.yml`.
+
+## Available Presets
+
+Biome distribution presets determine which biomes can generate and where they appear. Origen includes several built-in presets:
+
+### Rearth Preset (Default)
+
+The full Origen experience with all custom biomes enabled.
+
+```yaml pack.yml
+biomes: $biome-distribution/presets/rearth.yml:biomes
+```
+
+This preset includes:
+- All custom Origen biomes
+- Land, ocean, coastal, and cave biomes
+- Special biomes (sinkholes, spot biomes, canyons)
+- Balanced biome distribution
+
+### Default Preset
+
+A more vanilla-like experience using Terra's default distribution:
+
+```yaml pack.yml
+biomes: $biome-distribution/presets/default.yml:biomes
+```
+
+### Single Biome
+
+Generate a world with only one biome for testing:
+
+```yaml pack.yml
+biomes: $biome-distribution/presets/single.yml:biomes
+```
+
+<Note>
+You'll need to edit the single.yml preset file to specify which biome to use.
+</Note>
+
+## Switching Presets
+
+To switch between presets:
+
+1. Open `pack.yml` in the root of your Origen directory
+2. Find the `biomes:` configuration line
+3. Comment out the current preset by adding `#` at the start
+4. Uncomment your desired preset by removing the `#`
+
+### Example
+
+```yaml pack.yml
+# Default biome distribution
+# biomes: $biome-distribution/presets/default.yml:biomes
+
+# Active preset
+biomes: $biome-distribution/presets/rearth.yml:biomes
+
+# Single biome for testing
+# biomes: $biome-distribution/presets/single.yml:biomes
+```
+
+<Warning>
+Changing presets requires generating a new world or entering unexplored chunks. Existing chunks will retain their original biome distribution.
+</Warning>
+
+## Population Stages
+
+Population stages control what features generate after the initial terrain. Stages execute from top to bottom chronologically.
+
+### Default Stages
+
+Here are all the population stages in Origen:
+
+```yaml pack.yml
+stages:
+  # Global features like bedrock lava
+  - id: global-preprocessors
+    type: FEATURE
+  
+  # Misc terrain modifications
+  - id: preprocessors
+    type: FEATURE
+  
+  # Boulders and terrain-like features
+  - id: landforms
+    type: FEATURE
+  
+  # Smooth terrain with slabs
+  - id: slabs
+    type: FEATURE
+  
+  # Ore generation
+  - id: ores
+    type: FEATURE
+  
+  # Dirt, gravel, andesite patches
+  - id: deposits
+    type: FEATURE
+  
+  # River-specific features
+  - id: river-decoration
+    type: FEATURE
+  
+  # Trees and large features
+  - id: trees
+    type: FEATURE
+    
+  # Underwater plants
+  - id: underwater-flora
+    type: FEATURE
+    
+  # Grass, flowers, vines
+  - id: flora
+    type: FEATURE
+  
+  # Final touches like snow on trees
+  - id: postprocessors
+    type: FEATURE
+```
+
+### Disabling Stages
+
+You can disable any generation stage by commenting it out with `#`:
+
+#### Example: No Ores
+
+```yaml pack.yml
+stages:
+  - id: preprocessors
+    type: FEATURE
+  - id: landforms
+    type: FEATURE
+  # - id: ores
+  #   type: FEATURE
+  - id: deposits
+    type: FEATURE
+```
+
+#### Example: No Trees or Flora
+
+```yaml pack.yml
+stages:
+  - id: ores
+    type: FEATURE
+  - id: deposits
+    type: FEATURE
+  # - id: trees
+  #   type: FEATURE
+  # - id: flora
+  #   type: FEATURE
+  - id: postprocessors
+    type: FEATURE
+```
+
+<Tip>
+Disabling stages is useful for creating challenge worlds, testing terrain generation, or creating specific gameplay experiences.
+</Tip>
+
+## Customizing Presets
+
+You can create your own distribution preset by copying and modifying an existing one:
+
+1. Navigate to `biome-distribution/presets/`
+2. Copy an existing preset (e.g., `rearth.yml`)
+3. Rename it (e.g., `custom.yml`)
+4. Edit the biome distribution logic
+5. Reference it in `pack.yml`:
+
+```yaml pack.yml
+biomes: $biome-distribution/presets/custom.yml:biomes
+```
+
+### Preset Structure
+
+Biome distribution presets use a pipeline system. Here's a simplified example:
+
+```yaml custom.yml
+biomes:
+  type: PIPELINE
+  pipeline:
+    # Define sources (noise maps for temperature, continents, etc.)
+    source:
+      type: SAMPLER
+      # ...
+    
+    # Define stages (how biomes are selected)
+    stages:
+      # Continental stage (land vs ocean)
+      - type: SAMPLER
+        # ...
+      
+      # Temperature stage (hot vs cold biomes)
+      - type: SAMPLER
+        # ...
+```
+
+<Note>
+Customizing distribution presets requires understanding Terra's biome pipeline system. Check the [Terra documentation](https://terra.polydev.org/config/development/biome-pipeline.html) for detailed information.
+</Note>
+
+## Common Customization Scenarios
+
+### All Land, No Oceans
+
+Modify the continental stage in your preset to always return land biomes:
+
+```yaml
+# In your custom preset
+source:
+  continental:
+    type: CONSTANT
+    value: 1.0  # Always land
+```
+
+### Only Cold Biomes
+
+Modify the temperature stage to only select cold biomes:
+
+```yaml
+# In your custom preset
+source:
+  temperature:
+    type: CONSTANT
+    value: -1.0  # Always cold
+```
+
+### Specific Biome Mix
+
+Create a custom stage that selects from a limited biome pool:
+
+```yaml
+stages:
+  - type: EXPAND
+    id: custom-selection
+    expand:
+      PLAINS: weight: 3
+      FOREST: weight: 2
+      MOUNTAINS: weight: 1
+```
+
+<Warning>
+Extensive preset modifications can cause generation errors. Always test in a new world and keep backups of working configurations.
+</Warning>
+
+## Meta Parameters
+
+Some basic distribution parameters are available in `meta.yml`:
+
+```yaml meta.yml
+# World Y levels affect what can generate
+top-y: 319
+ocean-level: 62
+bottom-y: -64
+```
+
+These values affect:
+- Maximum build height
+- Where ocean biomes generate
+- Cave biome depth ranges
+- Structure placement limits
+
+## Testing Your Configuration
+
+1. **Backup your world** before making changes
+2. **Edit pack.yml** to change presets or stages
+3. **Create a new world** with the modified configuration
+4. **Use creative mode** and fly around to quickly evaluate biome distribution
+5. **Check multiple coordinates** - Some biomes are rarer than others
+6. **Test over distance** - Distribution patterns become clear at scale
+
+<Tip>
+Use a tool like [MineAtlas](https://mineatlas.com/) or [Chunkbase](https://www.chunkbase.com/) with your seed to preview biome distribution before extensive exploration.
+</Tip>
+
+## Advanced: Pipeline Sources
+
+Distribution presets can reference alternate sources and stages. Check the default preset for examples:
+
+```yaml
+# In biome-distribution/presets/default.yml
+source:
+  temperature: $../sources/temperature.yml:sampler
+  precipitation: $../sources/precipitation.yml:sampler
+  continental: $../sources/continental.yml:sampler
+```
+
+You can create your own sources in `biome-distribution/sources/` and reference them in custom presets.
+
+## Related Configuration
+
+- [Biome Sizes](/customization/biome-sizes) - Control how large biomes generate within the distribution
+- [Terrain Settings](/customization/terrain-settings) - Affects continental and elevation distribution
+- [Customization Overview](/customization/overview) - General guide to Origen's configuration system
+
+## Further Learning
+
+For in-depth customization of biome distribution:
+
+- Read the README in `biome-distribution/`
+- Check out [Terra's biome pipeline documentation](https://terra.polydev.org/config/development/biome-pipeline.html)
+- Examine the existing preset files in `biome-distribution/presets/`
+- Join the [Terra Discord](https://discord.gg/PXUEbbF) for community support

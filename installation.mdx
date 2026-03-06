@@ -1,0 +1,216 @@
+---
+title: Installation
+description: Step-by-step guide to installing Origen on your Minecraft server
+---
+
+# Installation
+
+This guide will walk you through installing Origen on your Minecraft server. The process is straightforward and takes just a few minutes.
+
+<Warning>
+Origen requires Terra to be installed first. Make sure you have Terra 6.4 or higher before proceeding.
+</Warning>
+
+## Prerequisites
+
+Before installing Origen, ensure you have:
+
+- A Minecraft server running version 1.20 or higher (Paper, Fabric, or Forge)
+- Terra 6.4 or higher installed on your server
+- Access to your server's file system
+
+### Installing Terra
+
+If you haven't installed Terra yet, you'll need to do that first:
+
+<Steps>
+  <Step title="Download Terra">
+    Visit [Terra on Modrinth](https://modrinth.com/plugin/terra) and download the version compatible with your server platform:
+    
+    - **Paper/Spigot**: Download the Bukkit version
+    - **Fabric**: Download the Fabric version
+    - **Forge**: Download the Forge version
+  </Step>
+  
+  <Step title="Install Terra">
+    Copy the Terra plugin/mod file to your server:
+    
+    - **Paper/Spigot**: Place in the `plugins` folder
+    - **Fabric/Forge**: Place in the `mods` folder
+  </Step>
+  
+  <Step title="Start Your Server">
+    Start your server once to generate Terra's configuration directories. Then stop the server before proceeding.
+  </Step>
+</Steps>
+
+## Installing Origen
+
+Once Terra is installed, you can add the Origen config pack:
+
+<Steps>
+  <Step title="Download Origen">
+    Visit the [Origen GitHub releases page](https://github.com/Rearth/Origen/releases/latest) and download the latest `origen-v*.*.*.zip` file.
+    
+    <Note>
+    Make sure to download the `.zip` file, not the source code archives.
+    </Note>
+  </Step>
+  
+  <Step title="Locate Terra's Pack Directory">
+    Find your Terra packs directory based on your server platform:
+    
+    **Paper/Spigot:**
+    ```
+    plugins/Terra/packs/
+    ```
+    
+    **Fabric:**
+    ```
+    config/Terra/packs/
+    ```
+    
+    **Forge:**
+    ```
+    config/Terra/packs/
+    ```
+    
+    If the `packs` folder doesn't exist, create it.
+  </Step>
+  
+  <Step title="Copy Origen Pack">
+    Copy the downloaded `origen-v*.*.*.zip` file into the Terra `packs` directory.
+    
+    <Warning>
+    Do **not** extract the ZIP file. Terra will load it automatically as a compressed pack.
+    </Warning>
+  </Step>
+  
+  <Step title="Verify Installation">
+    Start your server and check the console for Terra loading messages. You should see output indicating that Origen was loaded successfully:
+    
+    ```
+    [Terra] Loading pack: ORIGEN v1.0.0
+    [Terra] Pack ORIGEN loaded successfully
+    ```
+  </Step>
+</Steps>
+
+## Creating a World with Origen
+
+After installing Origen, you need to create a new world that uses it:
+
+<Steps>
+  <Step title="Configure World">
+    Edit your server's world generation settings to use Origen. The method varies by platform:
+    
+    **Paper/Spigot (Bukkit.yml):**
+    
+    Add to `bukkit.yml`:
+    
+    ```yaml
+    worlds:
+      world:
+        generator: Terra:ORIGEN
+      world_nether:
+        generator: Terra:ORIGEN
+      world_the_end:
+        generator: Terra:ORIGEN
+    ```
+    
+    **Fabric/Forge:**
+    
+    Use Terra's world creation commands in-game (requires operator permissions):
+    
+    ```
+    /terra world create <world-name> ORIGEN
+    ```
+  </Step>
+  
+  <Step title="Delete Old World (if needed)">
+    If you're replacing an existing world, you must delete the old world folders before starting the server:
+    
+    <Warning>
+    **Backup your world first!** This action is irreversible.
+    </Warning>
+    
+    Delete these folders:
+    - `world/`
+    - `world_nether/`
+    - `world_the_end/`
+  </Step>
+  
+  <Step title="Start Server">
+    Start your server. Terra will generate new worlds using the Origen pack.
+  </Step>
+</Steps>
+
+## Verification
+
+To verify Origen is working correctly:
+
+<Steps>
+  <Step title="Check Biomes">
+    Join your server and use the following command to check the current biome:
+    
+    ```
+    /terra biome info
+    ```
+    
+    You should see Origen biome names like "FOLIAGE_FORTRESS", "GLOOMY_GORGE", etc.
+  </Step>
+  
+  <Step title="Explore the World">
+    Travel around and look for Origen's distinctive terrain features:
+    
+    - Dramatic vertical terrain variations
+    - Unique biome formations
+    - Creative geological structures
+    - Advanced river systems
+  </Step>
+  
+  <Step title="Check Console">
+    Monitor your server console for any errors or warnings related to Terra or Origen.
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+### Origen Not Loading
+
+If Origen doesn't appear to be loading:
+
+1. **Check the ZIP file**: Ensure you downloaded the complete pack ZIP and not the source code
+2. **Verify placement**: Confirm the ZIP is in the correct `packs` directory
+3. **Check permissions**: Ensure the server has read permissions for the ZIP file
+4. **Review logs**: Check the server console and Terra logs for error messages
+
+### World Not Generating Correctly
+
+If your world generates but doesn't look like Origen:
+
+1. **Verify world configuration**: Check that your `bukkit.yml` or world creation command specified `ORIGEN`
+2. **Delete old world**: Make sure you deleted the old world folders before generating a new one
+3. **Check Terra version**: Confirm you're using Terra 6.4 or higher
+
+### Performance Issues
+
+If you experience performance problems:
+
+1. **Allocate more RAM**: Origen's complex terrain may require more memory
+2. **Reduce render distance**: Lower your server's view-distance setting
+3. **Pre-generate chunks**: Use Terra's chunk generation commands to pre-generate terrain
+
+For more detailed installation instructions, see the [Terra documentation](https://terra.polydev.org/config/pack-installation.html).
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Quick Start Guide" icon="rocket" href="/quickstart">
+    Learn how to create your first world with Origen
+  </Card>
+  
+  <Card title="Customization" icon="sliders" href="/customization/overview">
+    Customize biome sizes and distribution
+  </Card>
+</CardGroup>

@@ -1,0 +1,52 @@
+---
+title: Biome System Overview
+description: Understanding how biomes are distributed and placed in Origen
+---
+
+## Biome Distribution
+
+Considerable effort has been invested in ensuring that biomes are rendered in the desired size and shape. This enables the design of landform features within biomes of relatively specific dimensions, while also preventing the terrain itself from becoming overly large, small, or distorted.
+
+### Cellular Noise System
+
+At a fundamental level, biomes are established using **cellular noise**, resulting in a uniform size and shape for most biomes. These cellular units are subsequently categorized into land and ocean cells, determined by a continental value situated at the center of each cell.
+
+This approach ensures that land cells adjacent to oceans maintain their full size, without being truncated at the point where the "continental" equation would transition into ocean cells. This principle is also extended to ocean biomes.
+
+### Biome Categories
+
+Origen organizes biomes into five main categories:
+
+- **Land** - The primary terrestrial biomes with diverse terrain features
+- **Ocean** - Deep and shallow water biomes with underwater features
+- **Cave** - Underground cavern biomes with unique generation
+- **Coast** - Transitional biomes between land and ocean
+- **Special** - Rare biomes that override normal distribution rules
+
+### Coastal Biome Placement
+
+The identification and placement of coastal biomes involve utilizing the boundary between ocean and land cells. Subsequently, the coastal areas are divided into discrete units using a distinct seed.
+
+Coastal zones are classified into three categories:
+- **None** - Ocean directly borders land biomes
+- **Narrow** - Small coastal transition zones
+- **Wide** - Significantly wider coastal areas
+
+This results in some coastlines either being absent altogether or being categorized as narrow or significantly wider.
+
+### River System
+
+Rivers are added throughout all biomes tagged with "USE_RIVER". These rivers are generally broader and deeper than standard vanilla rivers, allowing smoother boat navigation.
+
+<Note>
+Certain biomes also feature river variants, often generating rivers that meander through cavernous sections of large mountains, thus negating the need for the river to cut entirely through these substantial landforms.
+</Note>
+
+### Customization
+
+Most top level settings, such as biome and river sizes, can be found in the `customization.yml` file. You can adjust:
+
+- Biome cell size and distribution
+- River width and frequency
+- Continental and ocean ratios
+- Coastal zone widths

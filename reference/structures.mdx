@@ -1,0 +1,502 @@
+---
+title: Structures Reference
+description: Technical reference for structure files and organization
+---
+
+## Overview
+
+The `structures/` directory contains the actual structure files that are placed in the world. These files define the physical objects - trees, boulders, fossils, etc. - that features load and place.
+
+<Note>
+Structures are the **physical objects** placed in the world. Features control **how and where** these structures spawn. See [Features Reference](/reference/features) for placement configuration.
+</Note>
+
+## Directory Structure
+
+```
+structures/
+├── boulders/              # Boulder structures
+│   ├── granite_boulder/
+│   ├── mossy_boulder/
+│   └── ...
+├── deposits/              # Ore and deposit structures
+│   ├── deposits/          # Dirt, gravel patches
+│   └── ores/              # Ore vein shapes
+├── misc/                  # Special structures
+│   ├── volcano/
+│   └── travertine/
+├── slabs/                 # Slab patterns for smoothing
+├── vegetation/            # All vegetation structures
+│   ├── trees/
+│   ├── flowers/
+│   ├── bushes/
+│   ├── coral/
+│   ├── crops/
+│   ├── mushrooms/
+│   ├── underwater/
+│   └── vines/
+└── rearth/                # Original Origen structures
+    ├── fossils/
+    └── giant_sakura/
+```
+
+<Note>
+The structure directory organization mirrors the `features/` directory for easy reference.
+</Note>
+
+## Structure File Formats
+
+Origen uses multiple structure file formats:
+
+### TerraScript (.tesf)
+
+TerraScript is Terra's custom scripting language for procedural structures.
+
+```javascript
+// Example tree structure
+block(0, 0, 0, "minecraft:oak_log");
+block(0, 1, 0, "minecraft:oak_log");
+block(0, 2, 0, "minecraft:oak_log");
+block(0, 3, 0, "minecraft:oak_log");
+
+// Leaves
+for(y = 3; y <= 5; y++) {
+    for(x = -2; x <= 2; x++) {
+        for(z = -2; z <= 2; z++) {
+            if(x == 0 && z == 0) continue;
+            block(x, y, z, "minecraft:oak_leaves[persistent=true]");
+        }
+    }
+}
+```
+
+**Advantages:**
+- Procedural generation
+- Randomization and variation
+- Conditional logic
+- Compact file size
+
+**Common uses:**
+- Trees with variation
+- Procedural plants
+- Random formations
+
+### Terra Object (.tobj)
+
+Binary format for saving structures from in-game.
+
+**Advantages:**
+- Fast loading
+- Compact storage
+- Exact block placement
+
+**Common uses:**
+- Pre-built structures
+- Complex hand-crafted objects
+- Fossils and special structures
+
+### Sponge Schematic (.schem)
+
+Minecraft schematic format compatible with WorldEdit.
+
+**Advantages:**
+- Create with WorldEdit in-game
+- Compatible with other tools
+- Easy to edit
+
+**Common uses:**
+- Buildings
+- Hand-crafted structures
+- Imported designs
+
+## Structure Categories
+
+### Trees
+
+Located in `structures/vegetation/trees/`
+
+<AccordionGroup>
+  <Accordion title="Procedural Trees">
+    Most trees use procedural TerraScript generation:
+    
+    - `oak_tree_procedural.tesf`
+    - `birch_tree_procedural.tesf`
+    - `spruce_tree_procedural.tesf`
+    - `jungle_tree_procedural.tesf`
+    - `acacia_tree_procedural.tesf`
+    - `dark_oak_tree_procedural.tesf`
+    - `cherry_blossom_tree_procedural.tesf`
+    - `autumnal_birch_tree_procedural.tesf`
+    
+    Each has variations built into the script for natural variety.
+  </Accordion>
+
+  <Accordion title="Leaf Clumps">
+    Decorative leaf structures:
+    
+    - `acacia_leaves_clump.tesf`
+    - `cherry_leaves_clump.tesf`
+    - `dark_oak_leaves_clump.tesf`
+    
+    Used for dense foliage in jungles and forests.
+  </Accordion>
+
+  <Accordion title="Special Trees">
+    Large pre-built trees:
+    
+    - Azalea trees (directory)
+    - Giant redwoods
+    - Massive jungle trees
+    - Custom sakura variants
+  </Accordion>
+</AccordionGroup>
+
+### Boulders
+
+Located in `structures/boulders/`
+
+<Accordion title="Boulder Types">
+  - **Granite boulders** - Large granite formations
+  - **Mossy boulders** - Moss-covered stone
+  - **Dripstone boulders** - Pointed dripstone clusters
+  - **Canyon boulders** - Eroded rock formations
+  
+  Each type usually has multiple variant files for variety.
+</Accordion>
+
+### Vegetation
+
+<AccordionGroup>
+  <Accordion title="Flowers">
+    Located in `structures/vegetation/flowers/`
+    
+    Individual flowers and flower patches:
+    - Single flower placements
+    - Small flower clusters (3-5 blocks)
+    - Meadow flower patches
+    - Forest floor vegetation
+  </Accordion>
+
+  <Accordion title="Bushes">
+    Located in `structures/vegetation/bushes/`
+    
+    - Sweet berry bushes
+    - Decorative leaf bushes
+    - Azalea bushes
+    - Dead bushes
+  </Accordion>
+
+  <Accordion title="Coral">
+    Located in `structures/vegetation/coral/`
+    
+    Underwater coral formations:
+    - Brain coral
+    - Tube coral
+    - Fire coral
+    - Horn coral
+    - Fan coral variations
+    - Coral clusters (multiple types together)
+  </Accordion>
+
+  <Accordion title="Mushrooms">
+    Located in `structures/vegetation/mushrooms/`
+    
+    - Small mushrooms (brown/red)
+    - Large mushroom trees
+    - Mushroom clusters
+    - Giant mushroom variants
+  </Accordion>
+
+  <Accordion title="Underwater Plants">
+    Located in `structures/vegetation/underwater/`
+    
+    - Kelp forests (procedural height)
+    - Seagrass patches
+    - Sea pickles
+    - Tall seagrass
+  </Accordion>
+
+  <Accordion title="Vines">
+    Located in `structures/vegetation/vines/`
+    
+    - Hanging vines (various lengths)
+    - Weeping vines
+    - Twisting vines
+    - Cave vines with glow berries
+  </Accordion>
+
+  <Accordion title="Crops">
+    Located in `structures/vegetation/crops/`
+    
+    - Pumpkin patches
+    - Melon patches
+    - Natural wheat
+    - Wild crops
+  </Accordion>
+</AccordionGroup>
+
+### Deposits & Ores
+
+<AccordionGroup>
+  <Accordion title="Surface Deposits">
+    Located in `structures/deposits/deposits/`
+    
+    Patches of alternate blocks:
+    - Dirt patches
+    - Gravel deposits
+    - Andesite veins
+    - Diorite veins
+    - Granite veins
+    - Clay deposits
+  </Accordion>
+
+  <Accordion title="Ore Structures">
+    Located in `structures/deposits/ores/`
+    
+    Ore vein shapes and patterns:
+    - Small scattered ores
+    - Large vein structures
+    - Clustered ore patterns
+    - Geode structures
+    
+    Shapes are referenced by ore feature configs.
+  </Accordion>
+</AccordionGroup>
+
+### Special Structures
+
+<AccordionGroup>
+  <Accordion title="Slabs" icon="layer-group">
+    Located in `structures/slabs/`
+    
+    Small slab patterns for terrain smoothing:
+    - Single slabs
+    - Slab lines
+    - Natural slab placement patterns
+    
+    Applied in the preprocessor stage to smooth terrain.
+  </Accordion>
+
+  <Accordion title="Travertine" icon="water">
+    Located in `structures/misc/travertine/`
+    
+    Travertine cascade structures:
+    - Travertine shelves
+    - Hot spring formations
+    - Calcite deposits
+    - Mineral pools
+  </Accordion>
+
+  <Accordion title="Volcano Features" icon="volcano">
+    Located in `structures/misc/volcano/`
+    
+    - Volcanic vents
+    - Lava pool structures
+    - Obsidian formations
+    - Volcanic rock patterns
+  </Accordion>
+</AccordionGroup>
+
+### Rearth Structures
+
+Original Origen content in `structures/rearth/`
+
+<AccordionGroup>
+  <Accordion title="Fossils">
+    Located in `structures/rearth/fossils/`
+    
+    Dinosaur fossil structures:
+    - Rib cage segments
+    - Skull structures
+    - Spine sections
+    - Complete skeletons
+    
+    Used in the Fossilized Fenlands biome.
+  </Accordion>
+
+  <Accordion title="Giant Sakura">
+    Located in `structures/rearth/giant_sakura/`
+    
+    Massive cherry blossom trees:
+    - Multiple size variants
+    - Different shapes
+    - Leaf canopy variations
+    
+    Found in Sakura Streams biome.
+  </Accordion>
+</AccordionGroup>
+
+## Structure Loading
+
+Structures are loaded by features using the `structures` key:
+
+```yaml
+# Single structure
+structures:
+  distribution:
+    type: CONSTANT
+  structures: structure_id
+
+# Multiple weighted structures
+structures:
+  distribution:
+    type: WEIGHTED
+  structures:
+    structure_variant_1: 3
+    structure_variant_2: 2
+    structure_variant_3: 1
+```
+
+### Structure IDs
+
+Structure IDs are derived from file paths:
+
+```
+File: structures/vegetation/trees/oak_tree_procedural.tesf
+ID:   oak_tree_procedural
+
+File: structures/boulders/granite_boulder/granite_boulder_1.tobj
+ID:   granite_boulder_1
+```
+
+<Warning>
+Structure IDs must be unique across all structure files in the pack.
+</Warning>
+
+## Creating Custom Structures
+
+### Using WorldEdit
+
+1. Build your structure in-game
+2. Select it with WorldEdit (`//wand`)
+3. Copy the selection (`//copy`)
+4. Save as schematic (`//schem save name`)
+5. Place `.schem` file in appropriate `structures/` subdirectory
+
+### Using TerraScript
+
+Create procedural structures with `.tesf` files:
+
+```javascript
+// Access structure metadata
+getArg("variant", 0);  // Get argument from feature config
+
+// Place blocks
+block(x, y, z, "minecraft:block_id");
+
+// Randomization
+if(randomInt(0, 100) > 50) {
+    block(x, y, z, "minecraft:stone");
+} else {
+    block(x, y, z, "minecraft:cobblestone");
+}
+
+// Loops for patterns
+for(i = 0; i < height; i++) {
+    block(0, i, 0, "minecraft:oak_log");
+}
+```
+
+**TerraScript Functions:**
+- `block(x, y, z, material)` - Place block
+- `randomInt(min, max)` - Random integer
+- `randomDouble(min, max)` - Random decimal
+- `getArg(name, default)` - Get feature argument
+- `structure(x, y, z, id)` - Place another structure
+
+### Using Terra Objects
+
+1. Build structure in-game
+2. Use Terra's save command: `/terra structure save <name>`
+3. Structure saves as `.tobj` in pack's structures folder
+4. Move to appropriate subdirectory
+
+## Structure Organization Best Practices
+
+### Naming Conventions
+
+- **Descriptive names**: `oak_tree_large_variant_1.tesf`
+- **Type suffix**: `granite_boulder_mossy.tesf`
+- **Variant numbers**: `flower_patch_1.tesf`, `flower_patch_2.tesf`
+
+### Directory Organization
+
+```
+structures/vegetation/trees/
+├── oak/                    # Tree type folders
+│   ├── small/
+│   ├── medium/
+│   └── large/
+├── spruce/
+└── procedural/             # Or keep procedural separate
+```
+
+### File Size Considerations
+
+- **Small structures** (< 100 blocks): Any format works
+- **Medium structures** (100-1000 blocks): Prefer `.tobj` or `.tesf`
+- **Large structures** (> 1000 blocks): Use `.tobj` for speed
+
+## Structure Rotation
+
+Structures can be rotated when placed:
+
+```yaml
+structures:
+  distribution:
+    type: CONSTANT
+  structures: tree_structure
+  rotation:
+    type: RANDOM       # Random 90° rotations
+    # Or specify angles
+    angles: [0, 90, 180, 270]
+```
+
+## Structure Checks
+
+Features can verify placement conditions:
+
+```yaml
+structures:
+  distribution:
+    type: CONSTANT
+  structures: tree_structure
+  checks:
+    - type: BLOCK_AIR
+      offset: [0, 1, 0]    # Check block above is air
+    - type: BLOCK_SOLID
+      offset: [0, -1, 0]   # Check block below is solid
+```
+
+## Performance Considerations
+
+### Structure Complexity
+
+- **Simple structures** load faster
+- **Procedural structures** generate on-demand
+- **Pre-built structures** (.tobj) load fastest
+
+### Structure Density
+
+Control density in feature configs, not by adding more structure files:
+
+```yaml
+# Good - adjust distributor
+distributor:
+  type: PADDED_GRID
+  width: 16    # Sparse
+  width: 4     # Dense
+
+# Avoid - creating many tiny structure files
+```
+
+## Related References
+
+<CardGroup cols={2}>
+  <Card title="Features" icon="tree" href="/reference/features">
+    How features load and place structures
+  </Card>
+  <Card title="Configuration Overview" icon="book" href="/reference/overview">
+    How structures fit into the overall config structure
+  </Card>
+</CardGroup>

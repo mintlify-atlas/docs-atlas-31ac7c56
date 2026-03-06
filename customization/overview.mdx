@@ -1,0 +1,111 @@
+---
+title: Customization Overview
+description: Learn how to customize Origen's terrain generation through YAML configuration files
+---
+
+Origen is highly customizable through YAML configuration files. You can adjust everything from biome sizes and terrain height to river frequency and distribution presets.
+
+## Key Configuration Files
+
+Origen's customization system is organized into three main configuration files:
+
+### customization.yml
+
+The primary customization file located at the root of the pack. This file contains most of the settings you'll want to adjust, including:
+
+- **Biome spread settings** - Control biome sizes, jitter, and borders
+- **Terrain parameters** - Base Y level, height, ocean depth
+- **River settings** - River scale, width, and spacing
+- **Elevation controls** - Continental scale, elevation thresholds
+- **Temperature and precipitation** - Climate zone distribution
+- **Special features** - Sinkholes, canyons, spot biomes
+
+### pack.yml
+
+Controls the core pack configuration, including:
+
+- **Biome distribution presets** - Choose between different world generation styles
+- **Population stages** - Define what features generate and in what order
+- **Addons and dependencies** - Required Terra addons
+
+### meta.yml
+
+Contains global metadata and constants:
+
+- **World Y levels** - Top, bottom, ocean level, deepslate transitions
+- **Bedrock configuration** - Where bedrock layers generate
+- **Palette base definitions** - Shared palette configurations
+
+## Configuration Structure
+
+Origen uses a well-organized directory structure to separate different aspects of world generation:
+
+```
+source/
+├── biomes/              # Biome definitions
+├── biome-distribution/  # Where biomes generate
+├── structures/          # Trees, boulders, features
+├── features/            # How structures generate
+├── palettes/            # Block compositions
+├── math/                # Noise functions and samplers
+└── */rearth/            # New Origen-specific content
+```
+
+<Note>
+Most of Origen's unique biomes and features can be found in subdirectories named `rearth/`. This is where you'll find the new content that sets Origen apart from the default Terra pack.
+</Note>
+
+## Quick Customization Examples
+
+### Making Biomes Larger
+
+Increase the `cellDistance` value in `customization.yml`:
+
+```yaml
+biomeSpread:
+  cellDistance: 500  # Default: 350
+```
+
+### Adjusting Terrain Height
+
+Modify terrain parameters in `customization.yml`:
+
+```yaml
+terrain-height: 150  # Default: 100
+terrain-base-y-level: 70  # Default: 65
+```
+
+### Changing River Frequency
+
+Adjust river scale in `customization.yml`:
+
+```yaml
+biomeSpread:
+  riverScale: 0.001  # Lower = bigger, more spaced rivers
+```
+
+## Navigating the Config
+
+Each directory in Origen contains a README file explaining its purpose and structure. When customizing Origen:
+
+1. **Start with `customization.yml`** for most common adjustments
+2. **Check `pack.yml`** to switch between distribution presets
+3. **Explore individual biome configs** in the `biomes/` directory for biome-specific tweaks
+4. **Refer to README files** in each directory for detailed explanations
+
+<Tip>
+Before making extensive changes, create a backup of your configuration files. This makes it easy to revert if something doesn't work as expected.
+</Tip>
+
+## Next Steps
+
+Explore specific customization topics:
+
+- [Biome Sizes](/customization/biome-sizes) - Control how large or small biomes generate
+- [Terrain Settings](/customization/terrain-settings) - Adjust height, elevation, and continental parameters
+- [River Settings](/customization/river-settings) - Customize river generation
+- [Distribution Presets](/customization/distribution-presets) - Switch between different world generation styles
+
+## Additional Resources
+
+For more advanced customization, check out the [Terra config development documentation](https://terra.polydev.org/config/development/index.html) to learn about the underlying configuration system.

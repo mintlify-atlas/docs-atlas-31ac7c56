@@ -1,0 +1,669 @@
+---
+title: Math Functions Reference
+description: Technical reference for mathematical functions and noise samplers
+---
+
+## Overview
+
+The `math/` directory contains reusable mathematical functions and noise samplers used throughout the Origen configuration pack. These provide the mathematical foundation for terrain generation, biome distribution, and feature placement.
+
+## Directory Structure
+
+```
+math/
+├── README.md
+├── functions/
+│   ├── terrace.yml
+│   ├── interpolation.yml
+│   ├── maskSmooth.yml
+│   └── clamp.yml
+└── samplers/
+    ├── terrain.yml
+    ├── continents.yml
+    ├── simplex.yml
+    ├── precipitation.yml
+    ├── temperature.yml
+    ├── rivers.yml
+    ├── spots.yml
+    └── spawnIsland.yml
+```
+
+## Functions vs Samplers
+
+<CardGroup cols={2}>
+  <Card title="Functions" icon="function">
+    Mathematical operations that transform input values
+    
+    - Take arguments and return computed values
+    - Used for calculations and transformations
+    - Reusable across configs
+  </Card>
+  <Card title="Samplers" icon="wave-square">
+    Noise generators that produce values for coordinates
+    
+    - Generate values based on X, Y, Z positions
+    - Used for terrain, temperature, biomes, etc.
+    - Can reference functions and other samplers
+  </Card>
+</CardGroup>
+
+## Functions
+
+Functions are defined in `math/functions/` and imported in `pack.yml`:
+
+```yaml
+functions:
+  "<<":
+    - math/functions/terrace.yml:functions
+    - math/functions/interpolation.yml:functions
+    - math/functions/maskSmooth.yml:functions
+    - math/functions/clamp.yml:functions
+```
+
+### terrace.yml
+
+Provides terracing functions for creating stepped terrain.
+
+<Accordion title="View Full Configuration">
+```yaml reference
+/home/daytona/workspace/source/math/functions/terrace.yml
+```
+
+Complete terrace functions:
+
+```yaml
+template: &template
+  arguments:
+    - i  # Input
+    - sc # Scale
+    - o  # Offset
+    - g  # Gap
+    - d  # Terrace depth
+  expression: d * sc * profile(clamp(floorMod(i/sc-o, 1+g))) + i
+
+childFunctions: &childFunctions
+  clamp:
+    arguments: [x]
+    expression: if(0 <= x && x < 1, x, 0)
+  floorMod:
+    arguments: [x, i]
+    expression: x - floor(x/i) * i
+
+functions:
+  terrace:
+    <<: *template
+    functions:
+      <<: *childFunctions
+      profile:
+        arguments: [x]
+        expression: "|x - 0.5| - 0.5"
+
+  terraceStrata:
+    <<: *template
+    functions:
+      <<: *childFunctions
+      profile:
+        arguments: [x]
+        expression: -if(x>0.95,-(x-1)/0.05,x/0.95)
+
+  terraceParabolic:
+    <<: *template
+    functions:
+      <<: *childFunctions
+      profile:
+        arguments: [x]
+        expression: (x - 0.5)^2 - 0.25
+
+  terraceParalinear:
+    <<: *template
+    functions:
+      <<: *childFunctions
+      profile:
+        arguments: [x]
+        expression: |
+          if(0.25 < x && x < 0.75,
+            2*(x-0.5)^2-0.375,
+            |x - 0.5| - 0.5
+          )
+```
+</Accordion>
+
+**Available terrace functions:**
+
+<AccordionGroup>
+  <Accordion title="terrace(i, sc, o, g, d)">
+    Basic terracing with sharp edges.
+    
+    **Parameters:**
+    - `i` - Input value (usually elevation)
+    - `sc` - Scale (terrace height)
+    - `o` - Offset (shifts terraces vertically)
+    - `g` - Gap (spacing between terraces)
+    - `d` - Depth (terrace step height)
+    
+    **Use case:** Mesa/badlands terrain, stepped mountains
+  </Accordion>
+
+  <Accordion title="terraceStrata(i, sc, o, g, d)">
+    Terracing with layered strata appearance.
+    
+    Creates horizontal bands with smooth transitions, like sedimentary rock layers.
+    
+    **Use case:** Badlands strata, terracotta pillars
+  </Accordion>
+
+  <Accordion title="terraceParabolic(i, sc, o, g, d)">
+    Terracing with parabolic (curved) steps.
+    
+    Smooth bowl-shaped terraces instead of sharp edges.
+    
+    **Use case:** Natural-looking stepped terrain
+  </Accordion>
+
+  <Accordion title="terraceParalinear(i, sc, o, g, d)">
+    Hybrid between parabolic and linear terracing.
+    
+    Combines curved centers with flat edges.
+    
+    **Use case:** Mixed terrain styles
+  </Accordion>
+</AccordionGroup>
+
+**Example usage:**
+
+```yaml
+noise-equation: |
+  terrace(
+    elevation(x, z),
+    20,    # 20-block high terraces
+    0,     # No offset
+    0.1,   # 10% gap between terraces
+    0.8    # 80% depth (steep steps)
+  )
+```
+
+### interpolation.yml
+
+Provides interpolation functions for smooth transitions.
+
+<AccordionGroup>
+  <Accordion title="lerp(t, a, b)">
+    Linear interpolation between two values.
+    
+    ```yaml
+    lerp(0.5, 0, 100) = 50
+    lerp(0.25, 10, 20) = 12.5
+    ```
+    
+    **Parameters:**
+    - `t` - Interpolation factor (0-1)
+    - `a` - Start value
+    - `b` - End value
+  </Accordion>
+
+  <Accordion title="herp(t, t1, v1, t2, v2)">
+    Hermite interpolation with control points.
+    
+    Smooth curve between two points with zero derivative at endpoints.
+    
+    **Use case:** Smooth continental transitions, biome blending
+  </Accordion>
+
+  <Accordion title="smoothstep(edge0, edge1, x)">
+    Smooth step function with zero derivatives at edges.
+    
+    Returns 0 when x < edge0, 1 when x > edge1, smooth curve between.
+    
+    **Use case:** Smooth transitions, blending regions
+  </Accordion>
+</AccordionGroup>
+
+### maskSmooth.yml
+
+Functions for masking and smoothing noise values.
+
+<AccordionGroup>
+  <Accordion title="mask(value, threshold)">
+    Binary masking - returns 0 or 1.
+    
+    ```yaml
+    mask(noise, 0.5)  # 1 if noise > 0.5, else 0
+    ```
+  </Accordion>
+
+  <Accordion title="smoothMask(value, threshold, range)">
+    Smooth masking with transition zone.
+    
+    ```yaml
+    smoothMask(noise, 0.5, 0.1)  # Smooth transition around 0.5
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### clamp.yml
+
+Value clamping and bounding functions.
+
+<AccordionGroup>
+  <Accordion title="clamp(value, min, max)">
+    Constrains value to range.
+    
+    ```yaml
+    clamp(elevation, 0, 255)  # Keep between 0-255
+    ```
+  </Accordion>
+
+  <Accordion title="clamp01(value)">
+    Clamps to 0-1 range.
+    
+    ```yaml
+    clamp01(noise)  # Ensure 0 <= noise <= 1
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Samplers
+
+Samplers are defined in `math/samplers/` and imported in `pack.yml`:
+
+```yaml
+samplers:
+  "<<":
+    - math/samplers/terrain.yml:samplers
+    - math/samplers/simplex.yml:samplers
+    - math/samplers/continents.yml:samplers
+    - math/samplers/precipitation.yml:samplers
+    - math/samplers/temperature.yml:samplers
+    - math/samplers/rivers.yml:samplers
+    - math/samplers/spots.yml:samplers
+```
+
+### terrain.yml
+
+Core terrain elevation samplers.
+
+<Accordion title="View Full Configuration">
+```yaml reference
+/home/daytona/workspace/source/math/samplers/terrain.yml
+```
+
+```yaml
+samplers:
+  rawElevation:
+    dimensions: 2
+    type: EXPRESSION
+    expression: noise(x / elevationScale / globalScale, z / elevationScale / globalScale)^3
+    variables:
+      globalScale: $customization.yml:global-scale
+      elevationScale: $customization.yml:elevation-scale
+    samplers:
+      noise:
+        dimensions: 2
+        type: TRANSLATE
+        x: 10000
+        z: 10000
+        sampler:
+          type: PROBABILITY
+          sampler:
+            type: RIDGED
+            octaves: 6
+            gain: 0.4
+            lacunarity: 2.2
+            sampler:
+              type: OPEN_SIMPLEX_2
+              frequency: 0.0003
+
+  elevation:
+    dimensions: 2
+    type: EXPRESSION
+    expression: |
+      herp(continents(x, z),
+        continentZero, 0,
+        continentFull, rawElevation(x, z) * herp(spawnIsland(x, z), 1, spawnIslandElevationScale, -1, 1))
+      * (1-riverTerrainErosion(x, z))
+    functions: $math/functions/interpolation.yml:functions
+    variables:
+      continentZero: -0.3
+      continentFull: 0.2
+      spawnIslandElevationScale: $customization.yml:spawn-island-elevation-scale
+    samplers:
+      rawElevation: $math/samplers/terrain.yml:samplers.rawElevation
+      continents: $math/samplers/continents.yml:samplers.continents
+      spawnIsland: $math/samplers/spawnIsland.yml:samplers.spawnIsland
+      riverTerrainErosion: $math/samplers/rivers.yml:samplers.riverTerrainErosion
+
+  oceanElevation:
+    dimensions: 2
+    type: EXPRESSION
+    expression: |
+      herp(continents(x, z),
+        continentZero, 0,
+        continentFull, -1+rawElevation(x, z)
+      )
+    functions: $math/functions/interpolation.yml:functions
+    variables:
+      continentZero: 0
+      continentFull: -0.8
+    samplers:
+      rawElevation: $math/samplers/terrain.yml:samplers.rawElevation
+      continents: $math/samplers/continents.yml:samplers.continents
+```
+</Accordion>
+
+**Key samplers:**
+
+<AccordionGroup>
+  <Accordion title="rawElevation(x, z)">
+    Base terrain noise before continental shaping.
+    
+    - Uses ridged noise for mountainous terrain
+    - Cubed for more dramatic peaks
+    - Controlled by `elevation-scale` and `global-scale` in customization.yml
+  </Accordion>
+
+  <Accordion title="elevation(x, z)">
+    Final surface elevation for land.
+    
+    - Combines rawElevation with continents sampler
+    - Applies river erosion
+    - Uses hermite interpolation for smooth transitions
+    - Primary sampler for terrain height
+  </Accordion>
+
+  <Accordion title="oceanElevation(x, z)">
+    Ocean floor elevation.
+    
+    - Separate from land elevation
+    - Typically negative values (below sea level)
+    - Allows for deep ocean trenches
+  </Accordion>
+</AccordionGroup>
+
+### continents.yml
+
+Determines ocean vs land distribution.
+
+<AccordionGroup>
+  <Accordion title="continents(x, z)">
+    Continental noise - positive = land, negative = ocean.
+    
+    - Uses low-frequency noise for large continents
+    - Smooth transitions between ocean and land
+    - Referenced by terrain samplers and biome distribution
+  </Accordion>
+</AccordionGroup>
+
+### temperature.yml
+
+Temperature distribution for biome zones.
+
+<AccordionGroup>
+  <Accordion title="temperature(x, z)">
+    Temperature value at position.
+    
+    - Higher values = warmer biomes (desert, jungle)
+    - Lower values = colder biomes (tundra, ice)
+    - Used in biome distribution stages
+    - Latitude-based with noise variation
+  </Accordion>
+</AccordionGroup>
+
+### precipitation.yml
+
+Rainfall/moisture distribution.
+
+<AccordionGroup>
+  <Accordion title="precipitation(x, z)">
+    Moisture level at position.
+    
+    - Higher values = wet biomes (jungle, swamp)
+    - Lower values = dry biomes (desert, savanna)
+    - Combined with temperature for biome selection
+  </Accordion>
+</AccordionGroup>
+
+### rivers.yml
+
+River generation and terrain erosion.
+
+<AccordionGroup>
+  <Accordion title="rivers(x, z)">
+    River noise - low values indicate river presence.
+    
+    - Creates winding river patterns
+    - Used for river biome placement
+    - Can be threshold to create binary river mask
+  </Accordion>
+
+  <Accordion title="riverTerrainErosion(x, z)">
+    Terrain height reduction near rivers.
+    
+    - Carves river valleys into terrain
+    - Smooth falloff from river center
+    - Applied in elevation sampler
+  </Accordion>
+</AccordionGroup>
+
+### simplex.yml
+
+Generic simplex noise samplers for various uses.
+
+<AccordionGroup>
+  <Accordion title="simplex2D(x, z, frequency)">
+    2D simplex noise.
+    
+    **Parameters:**
+    - `x, z` - Position
+    - `frequency` - Noise scale (higher = more detail)
+  </Accordion>
+
+  <Accordion title="simplex3D(x, y, z, frequency)">
+    3D simplex noise.
+    
+    Used for caves, 3D structures, vertical variation.
+  </Accordion>
+</AccordionGroup>
+
+### spots.yml
+
+Random spot/patch generation.
+
+<AccordionGroup>
+  <Accordion title="spots(x, z)">
+    Creates random circular regions.
+    
+    - Used for oases, clearings, special features
+    - Cellular-based for distinct spots
+    - Configurable size and frequency
+  </Accordion>
+</AccordionGroup>
+
+### spawnIsland.yml
+
+Flattens terrain near spawn for player spawn area.
+
+<AccordionGroup>
+  <Accordion title="spawnIsland(x, z)">
+    Spawn area modifier.
+    
+    - Returns 1 near spawn, -1 far from spawn
+    - Creates gentle terrain near world spawn
+    - Controlled by `spawn-island-elevation-scale`
+  </Accordion>
+</AccordionGroup>
+
+## Using Functions and Samplers
+
+### In Biome Configs
+
+```yaml
+# Use elevation sampler for terrain height
+noise-equation: |
+  elevation(x, z) * 100 + 64
+
+# Apply terracing
+noise-equation: |
+  terrace(elevation(x, z) * 100, 15, 0, 0.2, 0.7) + 64
+
+# Combine multiple samplers
+noise-equation: |
+  elevation(x, z) * 100 + 
+  simplex(x, z) * 10 + 
+  64
+```
+
+### In Feature Distributors
+
+```yaml
+distributor:
+  type: SAMPLER
+  sampler:
+    type: EXPRESSION
+    expression: temperature(x, z) > 0.5  # Only in warm areas
+```
+
+### In Biome Distribution
+
+```yaml
+sampler:
+  type: CELLULAR
+  return: NoiseLookup
+  lookup:
+    type: EXPRESSION
+    expression: continents(x, z)  # Use continents for ocean/land
+```
+
+## Customization Variables
+
+Many samplers reference `customization.yml` for easy tuning:
+
+```yaml
+# In customization.yml
+global-scale: 1.0           # Overall terrain scale
+elevation-scale: 1.0        # Vertical scale
+spawn-island-elevation-scale: 0.3  # Spawn flattening
+
+biomeSpread:
+  cellDistance: 800
+  cellJitter: 0.75
+```
+
+## Expression Syntax
+
+Expressions support standard mathematical operations:
+
+**Operators:**
+- `+`, `-`, `*`, `/` - Basic arithmetic
+- `^` - Exponentiation
+- `%` - Modulo
+- `|x|` - Absolute value
+
+**Functions:**
+- `floor(x)`, `ceil(x)`, `round(x)`
+- `min(a, b)`, `max(a, b)`
+- `sqrt(x)`, `abs(x)`
+- `sin(x)`, `cos(x)`, `tan(x)`
+- `if(condition, true_value, false_value)`
+
+**Example:**
+
+```yaml
+expression: |
+  if(elevation(x, z) > 0,
+    max(elevation(x, z) * 100, 0),
+    min(oceanElevation(x, z) * 50, -10)
+  ) + 64
+```
+
+## Creating Custom Functions
+
+Add new functions to existing YAML files or create new ones:
+
+```yaml
+functions:
+  myCustomFunction:
+    arguments:
+      - input
+      - scale
+    expression: input * scale + 10
+    functions:
+      # Can reference other functions
+      helper:
+        arguments: [x]
+        expression: x^2
+```
+
+Then import in `pack.yml`:
+
+```yaml
+functions:
+  "<<":
+    - math/functions/myCustomFunction.yml:functions
+```
+
+## Creating Custom Samplers
+
+```yaml
+samplers:
+  myCustomSampler:
+    dimensions: 2
+    type: EXPRESSION
+    expression: |
+      elevation(x, z) * temperature(x, z)
+    samplers:
+      elevation: $math/samplers/terrain.yml:samplers.elevation
+      temperature: $math/samplers/temperature.yml:samplers.temperature
+```
+
+## Performance Tips
+
+<CardGroup cols={2}>
+  <Card title="Cache Expensive Samplers" icon="memory">
+    Reuse sampler results instead of recalculating
+    
+    ```yaml
+    variables:
+      elev: elevation(x, z)
+    expression: elev * 100 + elev^2
+    ```
+  </Card>
+  <Card title="Reduce Octaves" icon="layer-group">
+    Lower octaves = faster generation
+    
+    ```yaml
+    octaves: 4  # Instead of 8
+    ```
+  </Card>
+  <Card title="Use Lower Frequency" icon="wave-square">
+    Higher frequency = more detail = slower
+    
+    ```yaml
+    frequency: 0.001  # Smoother, faster
+    ```
+  </Card>
+  <Card title="Simplify Expressions" icon="code">
+    Avoid deeply nested calculations
+    
+    ```yaml
+    # Good
+    expression: a * b + c
+    
+    # Slow
+    expression: sin(cos(tan(a^b^c)))
+    ```
+  </Card>
+</CardGroup>
+
+## Related References
+
+<CardGroup cols={2}>
+  <Card title="Configuration Overview" icon="book" href="/reference/overview">
+    How math functions fit into the overall config structure
+  </Card>
+  <Card title="Biome Distribution" icon="map" href="/reference/biome-distribution">
+    Using samplers in biome placement
+  </Card>
+  <Card title="Features" icon="tree" href="/reference/features">
+    Using samplers in feature distribution
+  </Card>
+</CardGroup>

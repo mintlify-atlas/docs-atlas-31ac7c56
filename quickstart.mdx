@@ -1,80 +1,271 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start
+description: Create your first world with Origen and start exploring unique biomes
 ---
 
-## Get started in three steps
+# Quick Start Guide
 
-Get your documentation site running locally and make your first customization.
+This guide will help you create your first Origen world and start exploring its 50+ unique biomes. If you haven't installed Origen yet, check out the [Installation guide](/installation) first.
 
-### Step 1: Set up your local environment
+## Creating Your First World
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+<Steps>
+  <Step title="Ensure Origen is Installed">
+    Verify that Origen is installed and loaded by checking your server console for:
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
+    ```
+    [Terra] Loading pack: ORIGEN v1.0.0
+    [Terra] Pack ORIGEN loaded successfully
+    ```
     
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
+    If you don't see this message, return to the [Installation guide](/installation).
+  </Step>
+  
+  <Step title="Configure Your Server">
+    Choose your server platform and configure it to use Origen:
     
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    **For Paper/Spigot Servers:**
+    
+    1. Stop your server
+    2. Edit `bukkit.yml` in your server root directory
+    3. Add or modify the `worlds` section:
+    
+    ```yaml bukkit.yml
+    worlds:
+      world:
+        generator: Terra:ORIGEN
+      world_nether:
+        generator: Terra:ORIGEN  
+      world_the_end:
+        generator: Terra:ORIGEN
+    ```
+    
+    **For Fabric/Forge Servers:**
+    
+    Use Terra's in-game commands (requires operator permissions):
+    
+    ```
+    /terra world create origen_world ORIGEN
+    ```
+    
+    This creates a new world called `origen_world` using the Origen pack.
+  </Step>
+  
+  <Step title="Backup and Delete Old World (if replacing)">
+    <Warning>
+    Only do this if you want to replace your existing world. Make a backup first!
+    </Warning>
+    
+    If you're replacing an existing world:
+    
+    1. Stop your server
+    2. Backup your current world folders
+    3. Delete the old world directories:
+       - `world/`
+       - `world_nether/`
+       - `world_the_end/`
+  </Step>
+  
+  <Step title="Start Your Server">
+    Start your Minecraft server. Terra will begin generating terrain using the Origen pack.
+    
+    <Info>
+    The first startup may take slightly longer as Terra initializes the Origen configuration.
+    </Info>
+  </Step>
+</Steps>
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+## Verifying Installation
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+Once your server is running, verify that Origen is working correctly:
 
-### Step 3: Go live
+<Steps>
+  <Step title="Join Your Server">
+    Connect to your server using your Minecraft client (version 1.20 or higher).
+  </Step>
+  
+  <Step title="Check Current Biome">
+    Use Terra's biome info command to see what biome you're in:
+    
+    ```
+    /terra biome info
+    ```
+    
+    You should see an Origen biome name such as:
+    - `FOLIAGE_FORTRESS`
+    - `GLOOMY_GORGE`
+    - `SNOWY_SPIRES`
+    - `LUSH_LOOPS`
+    - And many more!
+  </Step>
+  
+  <Step title="Observe the Terrain">
+    Look around and you should notice:
+    
+    - **Dramatic elevation changes**: Origen features more vertical terrain than vanilla
+    - **Unique formations**: Giant pillars, arches, plateaus, and canyons
+    - **Creative biomes**: Visually distinct environments unlike vanilla Minecraft
+    - **Advanced rivers**: Broader, deeper rivers that flow naturally through terrain
+  </Step>
+</Steps>
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+## Exploring Origen
 
-## Next steps
+Now that your world is set up, here's how to experience Origen's features:
 
-Now that you have your docs running, explore these key features:
+### Finding Notable Biomes
+
+Origen includes several categories of biomes. Here are some must-see locations:
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Dramatic Mountains" icon="mountain">
+    **Vertical Vistas**: Towering green mountains that reach into the clouds
+    
+    **Mountain Mirrors**: Terraced mountains with ice-covered walls
+    
+    **Gloomy Gorge**: Dark eroded cliffs with lush vegetation
+  </Card>
+  
+  <Card title="Unique Formations" icon="shapes">
+    **Mesa Monuments**: Terracotta pillars reaching 100 blocks high
+    
+    **Lush Loops**: Massive stone arches in jungle environments
+    
+    **Foliage Fortress**: Giant plateaus supported by stone pillars
+  </Card>
+  
+  <Card title="Underground Wonders" icon="lightbulb">
+    **Inferno Isles**: Lava lakes with platform islands on chains
+    
+    **Vine Vault**: Lush vegetation covering ceiling and floor
+    
+    **Terracotta Tombs**: Underground terracotta caverns
+  </Card>
+  
+  <Card title="Coastal Features" icon="water">
+    **Marine Monoliths**: Towering cliffs supported by white pillars
+    
+    **Stonegate Seas**: Giant stone arches above and below water
+    
+    **Arctic Arches**: Frozen ocean with massive ice arches
+  </Card>
 </CardGroup>
 
+### Using Terra Commands
+
+Terra provides useful commands for exploring Origen:
+
+```bash
+# Get information about your current biome
+/terra biome info
+
+# Teleport to a specific biome
+/terra biome locate <biome_name>
+
+# View all available Origen biomes
+/terra packs
+
+# Get information about the Origen pack
+/terra pack info ORIGEN
+```
+
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+These commands require operator permissions on the server.
 </Note>
+
+### Exploration Tips
+
+1. **Bring supplies**: Origen's dramatic terrain can make travel challenging
+2. **Use elytra**: The vertical terrain is perfect for elytra flight
+3. **Explore rivers**: Origen's rivers are designed for boat navigation
+4. **Look up and down**: Many features extend far above and below ground
+5. **Take screenshots**: Origen creates stunning vistas perfect for captures
+
+## Understanding Origen's World
+
+### Biome Distribution
+
+Origen uses sophisticated biome distribution:
+
+- **Cellular noise** ensures uniform biome sizes
+- **Continental system** separates land and ocean cleanly  
+- **Coastal categories**: None, narrow, or wide coastlines
+- **River variants**: Special rivers that flow through mountains
+
+### Terrain Features
+
+Key terrain characteristics you'll encounter:
+
+- **3D noise generation**: Complex, natural-looking terrain shapes
+- **Terraced mountains**: Stepped elevations with flat areas
+- **Advanced erosion**: Realistic-looking weathered stone
+- **Vertical structures**: Pillars, arches, and overhangs
+- **Cave rivers**: Rivers that flow through mountain caves
+
+### Special Biomes
+
+Some biomes have unique spawning rules:
+
+- **Sandy Splits**: Canyon biome that carves through any land biome
+- **Icy Incisions**: Frozen trench that cuts through cold biomes
+- **Oasis**: Micro-biome that spawns within desert biomes
+
+## Customizing Your Experience
+
+Origen offers customization options in the `meta.yml` file:
+
+### Adjusting Biome Size
+
+Edit `Terra/packs/origen/meta.yml` to modify biome scales:
+
+```yaml meta.yml
+biome-distribution:
+  scales:
+    biome: 1.0      # Default biome size (increase for larger biomes)
+    river: 0.8      # River frequency (increase for more rivers)
+    temperature: 1.2 # Temperature zone size
+```
+
+<Info>
+Restart your server after making changes. You'll need to generate new chunks to see the effects.
+</Info>
+
+### Choosing Distribution Presets
+
+Origen includes multiple distribution presets in `pack.yml`:
+
+- **Default**: Balanced land/ocean with all biome types
+- **Rearth**: Custom distribution by the pack creator (currently active)
+- **Single**: For testing individual biomes
+
+To switch presets, edit `pack.yml` and uncomment your preferred option.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Biome Guide" icon="book" href="/biomes/overview">
+    Explore all 50+ biomes in detail
+  </Card>
+  
+  <Card title="Customization" icon="sliders" href="/customization/overview">
+    Learn advanced customization options
+  </Card>
+  
+  <Card title="Configuration Reference" icon="wrench" href="/reference/overview">
+    Deep dive into configuration details
+  </Card>
+  
+  <Card title="Terra Documentation" icon="external-link" href="https://terra.polydev.org">
+    Learn more about Terra's features
+  </Card>
+</CardGroup>
+
+## Getting Help
+
+If you encounter issues or have questions:
+
+- **GitHub Issues**: Report bugs on the [Origen repository](https://github.com/Rearth/Origen/issues)
+- **Terra Discord**: Get help from the Terra community
+- **Terra Docs**: Reference the [official documentation](https://terra.polydev.org)
+
+Happy exploring!

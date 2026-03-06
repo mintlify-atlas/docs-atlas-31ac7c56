@@ -1,0 +1,512 @@
+---
+title: Features Reference
+description: Technical reference for feature generation and placement configuration
+---
+
+## Overview
+
+The `features/` directory contains configuration files that determine **how** structures are placed in the world. Features control the distribution, location, and placement logic for everything from trees to ore veins.
+
+<Note>
+Features define **placement rules** for structures. The actual structure files are stored in the `structures/` directory.
+</Note>
+
+## Directory Structure
+
+```
+features/
+├── boulders/
+│   ├── boulders.yml
+│   ├── granite_boulders.yml
+│   ├── granite_boulders_canyon.yml
+│   ├── mossy_boulders.yml
+│   └── dripstone_caves_boulder_patches.yml
+├── deposits/
+│   ├── deposits/          # Dirt, gravel, andesite patches
+│   └── ores/
+│       └── veins/         # Ore vein generation
+├── misc/
+│   ├── travertine/        # Travertine formations
+│   └── volcano/           # Volcano features
+├── slabs/                 # Smooth terrain with slabs
+├── vegetation/
+│   ├── trees/
+│   ├── flowers/
+│   ├── bushes/
+│   ├── coral/
+│   ├── crops/
+│   ├── dripleaf/
+│   ├── sculk/
+│   └── underwater/
+└── rearth/                # Original Origen features
+```
+
+## Feature Configuration Structure
+
+Every feature config follows this basic structure:
+
+```yaml
+id: FEATURE_ID
+type: FEATURE
+
+distributor:
+  # Controls WHERE features attempt to spawn
+  
+locator:
+  # Controls AT WHAT HEIGHT features spawn
+  
+structures:
+  # Defines WHICH structures to place
+```
+
+## Components
+
+### Distributors
+
+Distributors determine the horizontal placement pattern for features.
+
+<AccordionGroup>
+  <Accordion title="PADDED_GRID">
+    Places features in a grid with random padding.
+    
+    ```yaml
+    distributor:
+      type: PADDED_GRID
+      width: 8          # Grid cell size
+      padding: 5        # Random padding (0 to this value)
+      salt: 2315        # Random seed
+    ```
+    
+    Good for evenly distributed features like trees.
+  </Accordion>
+
+  <Accordion title="SAMPLER">
+    Uses noise to determine spawn chance at each location.
+    
+    ```yaml
+    distributor:
+      type: SAMPLER
+      sampler:
+        type: PROBABILITY
+        sampler:
+          type: OPEN_SIMPLEX_2
+          salt: 8244
+          frequency: 0.01
+      threshold: 0.2    # Spawn if noise > threshold
+    ```
+    
+    Good for clustered or organic patterns.
+  </Accordion>
+
+  <Accordion title="AND">
+    Combines multiple distributors - all must pass.
+    
+    ```yaml
+    distributor:
+      type: AND
+      distributors:
+        - type: PADDED_GRID
+          width: 8
+          padding: 5
+        - type: SAMPLER
+          sampler:
+            type: PROBABILITY
+            sampler:
+              type: OPEN_SIMPLEX_2
+              frequency: 0.01
+          threshold: 0.3
+    ```
+    
+    Useful for grid-based placement with noise variation.
+  </Accordion>
+
+  <Accordion title="OR">
+    Combines multiple distributors - any can pass.
+    
+    ```yaml
+    distributor:
+      type: OR
+      distributors:
+        - type: PADDED_GRID
+          width: 16
+        - type: SAMPLER
+          threshold: 0.8
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Locators
+
+Locators determine the vertical position where features spawn.
+
+<AccordionGroup>
+  <Accordion title="SURFACE">
+    Spawns on the terrain surface.
+    
+    ```yaml
+    locator:
+      type: SURFACE
+      range:
+        min: ${meta.yml:ocean-level}
+        max: ${meta.yml:top-y}
+    ```
+    
+    Most common locator for surface features.
+  </Accordion>
+
+  <Accordion title="PATTERN">
+    Spawns at heights matching a noise pattern.
+    
+    ```yaml
+    locator:
+      type: PATTERN
+      pattern:
+        type: OPEN_SIMPLEX_2
+        frequency: 0.02
+      range:
+        min: -64
+        max: 320
+    ```
+    
+    Good for cave features or scattered vertical placement.
+  </Accordion>
+
+  <Accordion title="TOP">
+    Spawns at the highest solid block.
+    
+    ```yaml
+    locator:
+      type: TOP
+      range:
+        min: 0
+        max: 320
+    ```
+  </Accordion>
+
+  <Accordion title="UNDERWATER">
+    Spawns on the ocean floor.
+    
+    ```yaml
+    locator:
+      type: UNDERWATER
+      range:
+        min: -64
+        max: ${meta.yml:ocean-level}
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Structure Selection
+
+Defines which structures to place when feature spawns.
+
+```yaml
+structures:
+  distribution:
+    type: CONSTANT      # Or WEIGHTED for multiple structures
+  structures: tree_oak  # Single structure ID
+```
+
+For weighted selection:
+
+```yaml
+structures:
+  distribution:
+    type: WEIGHTED
+  structures:
+    tree_oak: 3
+    tree_birch: 2
+    tree_spruce: 1
+```
+
+## Feature Categories
+
+### Boulders
+
+Boulders add large rock formations to terrain.
+
+<Accordion title="Example: Granite Boulders">
+```yaml reference
+/home/daytona/workspace/source/features/boulders/granite_boulders.yml
+```
+
+Full configuration:
+
+```yaml
+id: GRANITE_BOULDERS
+type: FEATURE
+
+distributor:
+  type: AND
+  distributors:
+    - type: PADDED_GRID
+      width: 8
+      padding: 5
+      salt: 2315
+    - type: SAMPLER
+      sampler:
+        type: PROBABILITY
+        sampler:
+          type: OPEN_SIMPLEX_2
+          salt: 8244
+          frequency: 0.01
+      threshold: 0.2
+
+locator:
+  type: SURFACE
+  range:
+    min: ${meta.yml:ocean-level} + 3
+    max: $meta.yml:top-y
+
+structures:
+  distribution:
+    type: CONSTANT
+  structures: granite_boulder
+```
+</Accordion>
+
+**Available boulder types:**
+- `granite_boulders.yml`
+- `granite_boulders_canyon.yml` - Variant for canyon biomes
+- `mossy_boulders.yml`
+- `dripstone_caves_boulder_patches.yml`
+
+### Vegetation
+
+Vegetation features are organized by type:
+
+<Accordion title="Trees">
+  Procedural and structure-based tree generation.
+  
+  - Large tree varieties (oak, spruce, jungle, etc.)
+  - Procedural generation using Terra's tree system
+  - Custom structures for special trees (giant sakura, redwood)
+  - Density controlled by biome configs
+</Accordion>
+
+<Accordion title="Flowers">
+  Small flower patches and individual flowers.
+  
+  - Distributed using sampler-based patterns
+  - Different flower types per biome
+  - Can generate as patches or individual plants
+</Accordion>
+
+<Accordion title="Bushes">
+  Berry bushes and decorative shrubs.
+  
+  - Sweet berry bushes
+  - Decorative leaf clusters
+  - Often combined with flower generation
+</Accordion>
+
+<Accordion title="Coral">
+  Underwater coral formations.
+  
+  - Requires underwater locator
+  - Various coral types and colors
+  - Fan corals and brain corals
+</Accordion>
+
+<Accordion title="Underwater">
+  Kelp, seagrass, and other aquatic plants.
+  
+  - Kelp forests
+  - Seagrass patches
+  - Sea pickles
+</Accordion>
+
+### Deposits
+
+Deposits include both decorative patches and ores.
+
+<Accordion title="Surface Deposits">
+  Patches of alternate blocks in terrain.
+  
+  - Dirt patches
+  - Gravel deposits
+  - Andesite/diorite/granite patches
+  - Clay deposits
+</Accordion>
+
+<Accordion title="Ore Veins">
+  Underground mineral generation.
+  
+  Located in `features/deposits/ores/veins/`:
+  - Iron, gold, copper, coal
+  - Diamond, emerald, lapis
+  - Redstone and other minerals
+  - Height ranges vary by ore type
+</Accordion>
+
+### Special Features
+
+<Accordion title="Travertine" icon="water">
+  Travertine formations in specific biomes.
+  
+  Located in `features/misc/travertine/`:
+  - Travertine cascades
+  - Hot spring formations
+  - Calcite deposits
+</Accordion>
+
+<Accordion title="Volcano Features" icon="volcano">
+  Special volcano-related features.
+  
+  Located in `features/misc/volcano/`:
+  - Lava pools
+  - Volcanic vents
+  - Obsidian formations
+</Accordion>
+
+<Accordion title="Slabs" icon="layer-group">
+  Smooth terrain transitions using slabs.
+  
+  Located in `features/slabs/`:
+  - Places slabs on terrain to smooth transitions
+  - Makes terrain look more natural
+  - Applied in preprocessor stage
+</Accordion>
+
+### Rearth Features
+
+Original Origen content in `features/rearth/`:
+
+- Dinosaur fossils
+- Giant sakura trees
+- Unique structures specific to Origen biomes
+
+## Generation Stages
+
+Features are applied in stages defined in `pack.yml`:
+
+```yaml
+stages:
+  - id: global-preprocessors
+    type: FEATURE
+  - id: preprocessors
+    type: FEATURE
+  - id: landforms       # Boulders
+    type: FEATURE
+  - id: slabs           # Terrain smoothing
+    type: FEATURE
+  - id: ores
+    type: FEATURE
+  - id: deposits        # Dirt/gravel patches
+    type: FEATURE
+  - id: river-decoration
+    type: FEATURE
+  - id: trees
+    type: FEATURE
+  - id: underwater-flora
+    type: FEATURE
+  - id: flora           # Flowers, grass
+    type: FEATURE
+  - id: postprocessors  # Snow on trees
+    type: FEATURE
+```
+
+### Stage Assignment
+
+Biomes assign features to stages in their config:
+
+```yaml
+stages:
+  trees:
+    - id: OAK_TREES
+      feature: features/vegetation/trees/oak_tree.yml
+    - id: BIRCH_TREES
+      feature: features/vegetation/trees/birch_tree.yml
+  flora:
+    - id: GRASS
+      feature: features/vegetation/grass.yml
+    - id: FLOWERS
+      feature: features/vegetation/flowers/meadow_flowers.yml
+```
+
+## Feature Configuration Tips
+
+### Density Control
+
+<Accordion title="Using Grid Width">
+  Smaller `width` = more dense placement
+  
+  ```yaml
+  distributor:
+    type: PADDED_GRID
+    width: 4    # Very dense
+    width: 16   # Sparse
+  ```
+</Accordion>
+
+<Accordion title="Using Sampler Threshold">
+  Higher `threshold` = less frequent placement
+  
+  ```yaml
+  distributor:
+    type: SAMPLER
+    threshold: 0.1   # 10% spawn chance
+    threshold: 0.9   # 90% spawn chance (very rare)
+  ```
+</Accordion>
+
+<Accordion title="Combining Distributors">
+  Use AND to make features rarer
+  
+  ```yaml
+  distributor:
+    type: AND
+    distributors:
+      - type: PADDED_GRID
+        width: 8
+      - type: SAMPLER
+        threshold: 0.5  # Only 50% of grid positions
+  ```
+</Accordion>
+
+### Height Ranges
+
+```yaml
+# Surface features
+range:
+  min: ${meta.yml:ocean-level}
+  max: ${meta.yml:top-y}
+
+# Cave features
+range:
+  min: -64
+  max: 40
+
+# Deep underground
+range:
+  min: -64
+  max: -32
+```
+
+### Structure Variation
+
+Use weighted structures for variety:
+
+```yaml
+structures:
+  distribution:
+    type: WEIGHTED
+  structures:
+    common_variant: 5
+    uncommon_variant: 2
+    rare_variant: 1
+```
+
+## Related References
+
+<CardGroup cols={2}>
+  <Card title="Structures" icon="cubes" href="/reference/structures">
+    Structure files that features place in the world
+  </Card>
+  <Card title="Math Functions" icon="calculator" href="/reference/math-functions">
+    Noise samplers used in feature distribution
+  </Card>
+  <Card title="Configuration Overview" icon="book" href="/reference/overview">
+    How features fit into the overall config structure
+  </Card>
+</CardGroup>

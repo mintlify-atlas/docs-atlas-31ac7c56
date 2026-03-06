@@ -1,0 +1,357 @@
+---
+title: Biome Distribution Reference
+description: Technical reference for biome placement and distribution configuration
+---
+
+## Overview
+
+The `biome-distribution/` directory contains all configuration related to **where** biomes generate in the world. Origen uses a sophisticated pipeline-based approach with cellular noise, temperature zones, and multi-stage refinement.
+
+## Directory Structure
+
+```
+biome-distribution/
+├── presets/
+│   ├── rearth.yml       # Main Origen distribution (default)
+│   └── single.yml       # Single biome for testing
+├── stages/
+│   ├── oceans.yml
+│   ├── coasts.yml
+│   ├── add_rivers.yml
+│   ├── fill_temperature_zones.yml
+│   ├── spread_temperature_zones.yml
+│   ├── fill_coasts.yml
+│   ├── fill_patchwork.yml
+│   └── special/
+│       ├── canyons.yml
+│       ├── border_biomes.yml
+│       ├── add_sinkholes.yml
+│       └── add_volcanos.yml
+└── extrusions/
+    ├── add_cave_biomes.yml
+    ├── add_deep_dark.yml
+    └── add_special_caves.yml
+```
+
+## Presets
+
+Presets define complete biome distribution configurations. The active preset is selected in `pack.yml`.
+
+### rearth.yml (Default)
+
+The main Origen biome distribution preset:
+
+```yaml
+biomes:
+  type: EXTRUSION
+  extrusions:
+    - << biome-distribution/extrusions/add_special_caves.yml:extrusions
+    - << biome-distribution/extrusions/add_cave_biomes.yml:extrusions
+    - << biome-distribution/extrusions/add_deep_dark.yml:extrusions
+  provider:
+    type: PIPELINE
+    resolution: 4
+    blend:
+      amplitude: 6
+      sampler:
+        type: OPEN_SIMPLEX_2
+        frequency: 0.012
+    pipeline:
+      source:
+        type: SAMPLER
+        sampler:
+          type: CELLULAR
+          jitter: ${customization.yml:biomeSpread.cellJitter}
+          return: NoiseLookup
+          frequency: 1 / ${customization.yml:biomeSpread.cellDistance}
+          lookup:
+            type: EXPRESSION
+            expression: continents(x, z)
+        biomes:
+          ocean: 1
+          land: 1
+      stages:
+        - << biome-distribution/stages/special/canyons.yml:stages
+        - << biome-distribution/stages/coasts.yml:stages
+        - << biome-distribution/stages/fill_coasts.yml:stages
+        - << biome-distribution/stages/oceans.yml:stages
+        # ... more stages
+```
+
+<Note>
+The distribution uses **EXTRUSION** type to layer cave biomes over the surface pipeline, and **PIPELINE** type for the main surface biome placement.
+</Note>
+
+### single.yml
+
+Used for testing - generates a world with a single biome:
+
+```yaml
+biomes:
+  type: SINGLE
+  biome: BIOME_ID
+```
+
+## Pipeline Stages
+
+Stages are applied sequentially to refine biome placement. Each stage can replace, expand, or smooth biome assignments.
+
+### Stage Types
+
+<AccordionGroup>
+  <Accordion title="REPLACE">
+    Replaces placeholder biomes with actual biomes using noise lookups.
+    
+    ```yaml
+    - type: REPLACE
+      from: ocean
+      sampler:
+        type: CELLULAR
+        frequency: 0.005
+      to:
+        OCEAN: 3
+        DEEP_OCEAN: 2
+        CORAL_OCEAN: 1
+    ```
+    
+    The weights determine relative spawn chances.
+  </Accordion>
+
+  <Accordion title="EXPAND">
+    Expands biome borders by a certain number of cells.
+    
+    ```yaml
+    - type: EXPAND
+      from: BEACH
+      to: OCEAN
+      width: 2
+    ```
+  </Accordion>
+
+  <Accordion title="FRACTAL_EXPAND">
+    Expands biomes with fractal noise for natural variation.
+    
+    ```yaml
+    - type: FRACTAL_EXPAND
+      sampler:
+        type: WHITE_NOISE
+    ```
+  </Accordion>
+
+  <Accordion title="SMOOTH">
+    Smooths biome transitions by blending neighbors.
+    
+    ```yaml
+    - type: SMOOTH
+      sampler:
+        type: WHITE_NOISE
+    ```
+  </Accordion>
+
+  <Accordion title="BORDER">
+    Adds border biomes between two biome types.
+    
+    ```yaml
+    - type: BORDER
+      from: LAND_BIOME
+      to: OCEAN
+      border: BEACH
+      width: 1
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Stage Files
+
+#### oceans.yml
+
+Replaces the placeholder `ocean` biome with specific ocean types based on temperature:
+
+```yaml reference
+/home/daytona/workspace/source/biome-distribution/stages/oceans.yml
+```
+
+<Accordion title="View Full Configuration">
+```yaml
+stages:
+  - type: REPLACE
+    from: ocean
+    sampler:
+      type: CELLULAR
+      jitter: ${customization.yml:biomeSpread.cellJitter}
+      return: NoiseLookup
+      frequency: 1 / ${customization.yml:biomeSpread.cellDistance}
+      lookup:
+        type: EXPRESSION 
+        expression: temperature(x, z)
+    to:
+      ocean_cold: 1
+      ocean_medium: 1
+      ocean_warm: 1
+  - type: REPLACE
+    from: ocean_cold
+    sampler:
+      type: CELLULAR
+      jitter: ${customization.yml:biomeSpread.cellJitter}
+      return: CellValue
+      frequency: 1 / ${customization.yml:biomeSpread.cellDistance}
+    to:
+      OCEAN: 2
+      ICEBERG_OCEAN: 2
+      FROZEN_OCEAN: 3
+      ABYSSAL_ALLEYS: 2
+      ARCTIC_ARCHES: 1
+  # ... more replacements for medium and warm oceans
+```
+</Accordion>
+
+#### coasts.yml
+
+Adds coastal biomes at land-ocean boundaries using border detection.
+
+#### add_rivers.yml
+
+Adds river biomes to land biomes tagged with `USE_RIVER`, with special variants for certain biomes.
+
+#### fill_temperature_zones.yml
+
+Replaces temperature-based placeholders with actual land biomes:
+
+- Cold zones → Frozen biomes
+- Temperate zones → Forest, plains, mountain biomes
+- Warm zones → Desert, savanna, jungle biomes
+
+#### spread_temperature_zones.yml
+
+Initially divides land into temperature zones using noise samplers.
+
+### Special Stages
+
+#### canyons.yml
+
+Carves large canyon biomes through any land biome using noise-based selection.
+
+#### border_biomes.yml
+
+Adds transitional biomes at borders between contrasting biome types.
+
+#### add_sinkholes.yml
+
+Places rare sinkhole biomes that ignore normal cellular distribution.
+
+#### add_volcanos.yml
+
+Adds volcano biomes in specific conditions.
+
+## Extrusions
+
+Extrusions add biomes in vertical layers, typically for caves and underground areas.
+
+### Structure
+
+```yaml
+extrusions:
+  - type: BIOME_EXTRUSION
+    biome: CAVE_BIOME_ID
+    min: -64
+    max: 40
+    sampler:
+      type: EXPRESSION
+      expression: noise(x, y, z) > 0.5
+```
+
+### Extrusion Files
+
+<CardGroup cols={2}>
+  <Card title="add_cave_biomes.yml" icon="cave">
+    Adds standard cave biomes in different elevation ranges
+  </Card>
+  <Card title="add_special_caves.yml" icon="sparkles">
+    Adds unique cave biomes (Inferno Isles, Vine Vault, Terracotta Tombs)
+  </Card>
+  <Card title="add_deep_dark.yml" icon="moon">
+    Adds deep dark biome at low elevations
+  </Card>
+</CardGroup>
+
+## How the Pipeline Works
+
+### Step-by-Step Process
+
+1. **Source Generation**
+   - Cellular noise creates uniform biome cells
+   - Continental sampler determines ocean vs land
+   - Results in placeholder `ocean` and `land` biomes
+
+2. **Special Features** (canyons, sinkholes)
+   - Applied first to carve through normal distribution
+   - Use position-independent noise for random placement
+
+3. **Coast Definition**
+   - Detects ocean-land borders
+   - Creates coastal placeholder biomes
+   - Varies coast width (narrow vs wide)
+
+4. **Ocean Refinement**
+   - Replaces ocean placeholders with specific ocean biomes
+   - Uses temperature lookup for variety
+   - Assigns deep vs shallow variants
+
+5. **Land Temperature Zones**
+   - Divides land into cold/temperate/warm zones
+   - Uses temperature noise sampler
+   - Creates zone placeholders
+
+6. **Biome Assignment**
+   - Replaces placeholders with actual biomes
+   - Uses cellular noise for variation within zones
+   - Weights control relative spawn rates
+
+7. **Border Biomes**
+   - Adds transitional biomes between contrasting types
+   - Smooths harsh biome transitions
+
+8. **Smoothing & Expansion**
+   - FRACTAL_EXPAND adds natural irregularity
+   - SMOOTH blends biome edges
+   - Multiple passes for final refinement
+
+9. **Rivers**
+   - Added last to flow through all biomes
+   - Uses river noise sampler
+   - Special variants for mountain biomes
+
+10. **Cave Extrusions**
+    - Layered vertically over surface biomes
+    - Use 3D noise for placement
+    - Independent of surface distribution
+
+## Customization Variables
+
+Biome distribution uses variables from `customization.yml`:
+
+```yaml
+biomeSpread:
+  cellDistance: 800    # Biome cell size in blocks
+  cellJitter: 0.75     # Randomness of cell shape (0-1)
+
+global-scale: 1.0      # Overall terrain scale multiplier
+elevation-scale: 1.0   # Vertical terrain scale
+```
+
+### Tuning Biome Size
+
+- **Larger biomes**: Increase `cellDistance`
+- **More regular shapes**: Decrease `cellJitter`
+- **More variety**: Decrease `cellDistance`, increase jitter
+
+## Related References
+
+<CardGroup cols={2}>
+  <Card title="Math Functions" icon="calculator" href="/reference/math-functions">
+    Samplers used in distribution (continents, temperature, rivers)
+  </Card>
+  <Card title="Configuration Overview" icon="book" href="/reference/overview">
+    How biome distribution fits into the overall config structure
+  </Card>
+</CardGroup>
