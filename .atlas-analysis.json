@@ -1,0 +1,72 @@
+{
+  "projectType": "general",
+  "projectName": "Origen",
+  "projectDescription": "A creative and diverse overworld terrain generation config pack for Terra on Minecraft 1.20+",
+  "theme": "palm",
+  "primaryColor": "#04ac5c",
+  "lightColor": "#1fd56c",
+  "darkColor": "#17221f",
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get Started",
+        "pages": [
+          "introduction",
+          "installation",
+          "quickstart"
+        ]
+      },
+      {
+        "group": "Biomes",
+        "pages": [
+          "biomes/overview",
+          "biomes/land",
+          "biomes/ocean",
+          "biomes/cave",
+          "biomes/coast",
+          "biomes/special"
+        ]
+      },
+      {
+        "group": "Customization",
+        "pages": [
+          "customization/overview",
+          "customization/biome-sizes",
+          "customization/terrain-settings",
+          "customization/river-settings",
+          "customization/distribution-presets"
+        ]
+      },
+      {
+        "group": "Configuration Reference",
+        "pages": [
+          "reference/overview",
+          "reference/biome-distribution",
+          "reference/features",
+          "reference/palettes",
+          "reference/structures",
+          "reference/math-functions"
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "50+ unique biomes including land, ocean, cave, and coast variants",
+    "Advanced cellular noise-based biome distribution system",
+    "Customizable terrain with terraces, overhangs, and pillar formations",
+    "Broad navigable rivers with special mountain variants",
+    "Extensive customization through YAML configuration files",
+    "Compatible with vanilla Minecraft (no new blocks or items)"
+  ],
+  "publicApiSurface": [
+    "biomes/ - Biome configuration files",
+    "biome-distribution/ - Biome placement and distribution configs",
+    "features/ - Terrain feature definitions (trees, boulders, flora)",
+    "palettes/ - Block palette definitions for terrain generation",
+    "structures/ - Structure files (trees, boulders, flower patches)",
+    "math/ - Mathematical functions and noise samplers",
+    "pack.yml - Main pack configuration",
+    "customization.yml - User-facing customization parameters",
+    "meta.yml - Global settings and constants"
+  ]
+}
